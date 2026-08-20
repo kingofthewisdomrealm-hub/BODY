@@ -1,6 +1,6 @@
 # Food, digestion, and the rest of the body
 
-The digestive tract is not a closed ride. Almost everything it does is **for another system**. This file is the coupling map: what leaves the gut, where it goes, what comes back, and what the digestive app should light up so later BODY apps can pick up the same packet.
+The digestive tract is not a closed ride. It **imports** from other systems (and from the plate), **consumes** some of that itself, and **exports** the rest. This file is the coupling map in both directions, plus who is actually doing the eating.
 
 Rule that cartoons skip: **food in the lumen is still outside you.** It becomes “in the body” only after it crosses mucosa into blood or lymph. OpenStax: mouth and anus open to the outside; absorption is the border crossing.
 
@@ -19,30 +19,94 @@ Each system has four rows:
 | **This meal** | Minutes to hours |
 | **This pattern** | Weeks to years — only light this if the user says “every day” |
 
-The digestive app gets a fourth view, **Exports**, beside Anatomy / Imaging / Chemistry. Absorbed packets leave the intestine as labeled streams. Click a destination to dim everything else. Those click-targets are the future apps.
+The digestive app’s fourth view is **Exchange** (imports *and* exports), beside Anatomy / Imaging / Chemistry. Streams run both ways. Click a system to isolate its pipes. Those chips are the future apps.
+
+---
+
+## Who is eating?
+
+The digestive system does **not** eat. It **receives**. Eating is a whole-body act that ends when food crosses the lips.
+
+| Job | Who owns it | Grade |
+|---|---|---|
+| “I’m hungry” | Nervous (hypothalamus) listening to ghrelin (stomach), leptin (fat), glucose, stretch | ✓ |
+| Decide to eat, find food, bring it to the mouth | Nervous + musculoskeletal (hands, arms) | ✓ |
+| Smell / see / remember food → drool, acid starts | Nervous **cephalic phase** → salivary glands + stomach. Pavlov is real. | ✓ |
+| Bite, chew, tongue | Skeletal (teeth) + musculoskeletal (masseter, tongue) + nervous (CN V, VII, XII) | ✓ |
+| Taste | Nervous (CN VII, IX, X). The tongue is a sensor, not a stomach. | ✓ |
+| Swallow | Nervous swallow reflex + skeletal muscle (pharynx, upper esophagus) then smooth muscle | ✓ |
+| Don’t inhale the sandwich | Respiratory (epiglottis) sharing the throat with digestive | ✓ |
+| Everything after the bolus is in the esophagus | Digestive | ✓ |
+
+So: **nervous system wants it, musculoskeletal delivers it, skeletal breaks it, respiratory keeps the airway, digestive processes what arrived.** No single BODY app is “the eater.” The digestive app starts at the plate-to-mouth handoff and must show those other systems lighting *before* the first peristaltic wave.
+
+Cephalic phase is the proof of imports: you can start gastric acid **without food in the stomach**, from brain signals alone. NIDDK: see or smell food → salivary glands. ✓
+
+---
+
+## Imports (other systems → gut)
+
+Most of the fluid in the tract on a given day **did not come from the glass**. Textbooks put ~**8–9 L/day** through the lumen: ~**2 L** oral intake + ~**6–7 L** secreted from blood into the tube, then ~98% reabsorbed, ~100–200 mL lost in stool. Exact liters vary by book (~). Direction is ✓.
+
+| Source (typical textbook band) | ~L/day | What it is |
+|---|---|---|
+| Drink + food water | ~1.5–2 | The only import from **outside** the body |
+| Saliva | ~1–1.5 | Water, mucus, amylase, lipase — from blood via salivary glands |
+| Gastric juice | ~1.5–2.5 | HCl, pepsinogen, IF, mucus — parietal/chief cells pulling from plasma |
+| Bile | ~0.5–1 | Liver product: bile salts + **bilirubin from dead red cells** |
+| Pancreatic juice | ~1–2.5 | HCO₃ + enzymes — from blood via pancreas |
+| Small-bowel secretions | ~1–3 | Mucus, water, electrolytes, enzymes |
+| Colon | small | Mucus; most of the job is taking water *back* |
+
+**The gut is a recirculating pump, not a one-way drain.** Blood → juices → lumen → absorb → blood. Diarrhea is that loop failing (export of *imported* water).
+
+### Import packets by system
+
+| From | What the gut takes | If it stops |
+|---|---|---|
+| **Outside world** | Food, drink, swallowed air | Nothing to digest. This is not another body system. |
+| **Circulatory** | O₂, water, Na/K/Cl/HCO₃ for juices, glucose/glutamine to fuel the wall, clotting factors if we bleed, immune cells | Gut wall is expensive tissue; ischemia kills bowel fast. No plasma → no acid, no bile, no enzymes. |
+| **Nervous** | Chew/swallow commands, cephalic phase, vagal “rest and digest,” sympathetic brake, ENS local reflexes | Ileus, dry mouth, no swallow, no hunger |
+| **Endocrine** | Thyroid tone on motility, cortisol, insulin (after absorption, storage), plus the gut’s *own* hormones looping back | Hypothyroid constipation is a real clinic pattern |
+| **Immune** | Recruited cells, secretory IgA production machinery | Barrier fails; or overreacts (celiac, IBD, allergy) |
+| **Musculoskeletal** | Mastication, tongue, sitting upright, abdominal press for defecation | Pureed diet / constipation from immobility |
+| **Skeletal** | Teeth; bony protection; calcium store the gut later restocks | Can’t chew |
+| **Respiratory** | O₂; a clear airway so the swallow is legal | Aspiration |
+| **Urinary** | **1,25-OH vitamin D** — the hormone that tells duodenum to absorb calcium | Kidney failure → gut calcium absorption falls even if diet is fine |
+| **Skin** | Vitamin D precursor (sun) that liver then kidney activate | Same calcium loop |
+| **Heme / spleen / marrow** | Bilirubin from broken-down RBCs, dumped into bile | No brown stool pigment; jaundice if the dump backs up |
+| **Colon microbes** | Butyrate and other SCFA — **colonocytes eat this as fuel** | Starved colon lining in some models; not a cartoon “probiotic glow” |
+
+### The gut also eats
+
+Enterocytes (small bowel) run on **glutamine** and glucose from the blood and from what they are absorbing. Colonocytes prefer **butyrate** made by bacteria from leftover carb. So part of every meal is spent **keeping the factory itself alive**, not shipped to muscle. ✓ direction; don’t put a calorie pie chart on screen in V1 unless we source the fractions.
+
+Epithelium turns over in **days**. That shed cell mass is an import-then-export: amino acids from blood → new mucosa → cells slough into the lumen → some get re-digested. The stool includes leftover diet **plus** you. ✓
 
 ---
 
 ## Master map
 
 ```
-FOOD
-  │
-  ├─ chew / swallow / acid / enzymes / bile     (still outside)
-  │
-  ├─ ABSORPTION (the border)
-  │     ├─ portal vein ──► liver ──► heart ──► every tissue     (sugars, amino acids, water, salts, most vitamins)
-  │     └─ lacteals ──► lymph ──► thoracic duct ──► blood       (fats, fat-soluble vitamins)
-  │
-  ├─ leftover in lumen ──► colon microbes ──► gas, SCFA, stool
-  │
-  └─ signals, not food
-        ├─ hormones (gastrin, CCK, secretin, GIP, GLP-1, PYY, ghrelin)
-        ├─ nerves (ENS, vagus, sympathetic)
-        └─ immune sampling (GALT, Peyer patches, secretory IgA)
+OUTSIDE WORLD ── food, drink, air ──► MOUTH
+OTHER SYSTEMS ── hunger, hands, teeth, chew, swallow ──► MOUTH
+
+BLOOD ── O2, water, salts, glutamine ──► gut wall + glands
+BLOOD ── 6–7 L juices/day ──► LUMEN (still “outside”)
+NERVES / HORMONES ── commands ──► motility + secretion
+DEAD RED CELLS ── bilirubin ──► bile ──► LUMEN
+KIDNEY + SKIN ── activated vitamin D ──► calcium absorption
+MICROBES ── butyrate ──► colonocytes
+
+                    ┌─ the wall itself (glutamine, butyrate)
+LUMEN ── absorb ───┤
+                    ├─ portal vein ──► liver ──► heart ──► tissues
+                    └─ lacteals ──► lymph ──► blood
+
+leftover ──► colon ──► stool (~0.1–0.2 L water) + gas
 ```
 
-OpenStax’s Table 23.1 is the reverse (other systems supporting digestion). Both directions belong on screen.
+OpenStax Table 23.1 is this import column. Exports are the rest of this file. Both arrows on screen.
 
 ---
 
@@ -510,19 +574,21 @@ Short-term panel lists packets that moved **this meal**. Long-term panel lists s
 | Brain starves because blood went to the stomach | Splanchnic flow rises; cerebral flow is kept |
 | Leaky gut as the cause of everything | Not a diagnosis we will ship |
 | Microbiome as a personality | Overclaim |
+| The digestive system “eats” | It receives. Nervous + musculoskeletal eat. |
+| All lumen fluid came from the glass | Most of it was secreted from blood, then taken back |
 
 ---
 
 ## 15. Digestive-app UI
 
-**Exports view**
+**Exchange view** (toggle **Imports** / **Exports** / **Both**)
 
-- Default: anatomy with faint portal + lacteal.
-- On absorption: particles split at the villus (red capillary vs cream lacteal).
-- System chips around the body: Circulatory, Lymph, Nervous, Endocrine, Immune, Respiratory, Muscle/Bone, Urinary, Skin, Reproductive.
-- Hover: one-sentence coupling from this file.
-- Click: that system’s streams only + “opens in BODY / {system} later.”
-- Breath-hydrogen and satiety/vagus are on by default; reproductive and jaundice are pattern/pathology.
+- Default **Both**: faint arterial inflow + juice secretion into the lumen; portal + lacteal leaving.
+- **Imports on**: hungry hypothalamus, hands-to-mouth, teeth, cephalic drool, arterial pulse into glands, ~liters of juice appearing in the lumen *before* much of the meal has arrived, bilirubin into bile, vitamin D tag from skin/kidney.
+- **Exports on**: villus split (red capillary vs cream lacteal), system chips lighting as packets land.
+- System chips: Circulatory, Lymph, Nervous, Endocrine, Immune, Respiratory, Muscle/Bone, Urinary, Skin, Reproductive. Hover = one sentence. Click = that system’s streams + “opens in BODY / {system} later.”
+- Caption on first swallow: **the gut did not decide to eat.**
+- Breath-hydrogen and satiety/vagus on by default; reproductive and jaundice are pattern/pathology.
 
 **Inspector copy** is this file, shortened, with grades on the claims that influencers get wrong (serotonin, 70%, detox).
 
@@ -530,9 +596,9 @@ Short-term panel lists packets that moved **this meal**. Long-term panel lists s
 
 ## 16. Build order for the series
 
-The digestive app is the factory. Other apps are destinations.
+The digestive app is a factory **and** a customer. Other apps are both suppliers and destinations.
 
-1. Digestive Phase 4 already emits `exports[]`.
+1. Digestive Phase 4 emits `imports[]` and `exports[]`.
 2. Circulatory is next because most packets hit blood second.
 3. Endocrine rides the same glucose curve.
 4. Nervous needs the “serotonin stays here” caption before anyone else invents a mood gut.

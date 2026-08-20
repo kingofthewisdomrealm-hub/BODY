@@ -19,7 +19,8 @@ What was read for the digestive plan, food engine, and other-systems map. Weight
 | NIDDK, *Your Digestive System & How it Works* (rev. 2017). https://www.niddk.nih.gov/health-information/digestive-diseases/digestive-system-how-it-works | A | Organs, peristalsis, secretions table, nutrient endpoints, ENS/hormones |
 | Ogobuiro et al., *Physiology, Gastrointestinal*. StatPearls. 2023. https://www.ncbi.nlm.nih.gov/books/NBK537103/ | A | Layers, saliva volume, stomach pH, sphincters, villi, hormones, colon bacteria / vit K |
 | Patricia & Dhamoon, *Physiology, Digestion*. StatPearls. 2022. https://www.ncbi.nlm.nih.gov/books/NBK544242/ | A | Mechanical vs chemical, 2 mm pylorus rule, MMC, enzyme cascade, lactose tests |
-| OpenStax *Anatomy and Physiology 2e*, ch. 23 (2022). https://openstax.org/books/anatomy-and-physiology-2e/pages/23-1-overview-of-the-digestive-system | A | Living vs cadaver length, wall layers, ENS size, portal system, ~¼ cardiac output, peritoneum, other-systems table |
+| OpenStax *Anatomy and Physiology 2e*, ch. 23 (2022). https://openstax.org/books/anatomy-and-physiology-2e/pages/23-1-overview-of-the-digestive-system | A | Living vs cadaver length, wall layers, ENS size, portal system, ~¼ cardiac output, peritoneum, **Table 23.1 other systems → gut (imports)** |
+| Textbook GI secretion tallies (Deranged Physiology CICM notes; clinical GI fluid chapters). Bands ~7–9 L/day through the lumen, ~2 L oral, rest secreted, ~100–200 mL stool water | B | Import of plasma into juices; recirculation. Exact liters vary — show a band |
 | OpenStax 23.4 Stomach; 23.5 Small and Large Intestines | A | Stomach regions/capacity; SI 10 ft living / 1 in; colon 5 ft / 3 in; ~200 m² |
 | Cleveland Clinic, *Digestive System*. https://my.clevelandclinic.org/health/body/7041-digestive-system | B | GI vs biliary tract; “22 ft” SI — flag as non-living length |
 

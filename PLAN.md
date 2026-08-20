@@ -17,7 +17,7 @@ Three views of the same event. The user can switch instantly.
 | **Anatomy** | See-through body. Organs in real positions, living lengths, peristalsis, contents changing form. | Organs as a straight vertical tube. Small intestine as a few loops. Stomach as a bag in the middle. |
 | **Imaging** | What a radiologist actually sees: plain film, barium fluoroscopy, optional CT-slice. | A cheeseburger glowing on a plain x-ray. Regular food is mostly invisible on plain film. |
 | **Chemistry** | pH, enzymes, bile, water, gas, absorption arrows. | One magic “digest” sparkle that skips stations. |
-| **Exports** | Packets leaving the gut into blood, lymph, nerves, hormones, immune tissue, and the other BODY systems. | Food flying into a bicep, uterus, or coronary artery. Gut serotonin as mood. |
+| **Exchange** | Imports into the gut (blood-made juices, nerves, teeth, vitamin D) and exports out (portal, lymph, hormones). | The gut as a lone eater. All lumen water coming from the glass. Food flying into a bicep. Gut serotonin as mood. |
 
 The killer honesty: **if you x-ray a person who just ate, you do not see the meal.** You see bone (white), gas (black), soft tissue (gray), and mottled fecal residue in the colon. To watch a bolus move you need contrast (barium swallow / upper GI / small-bowel follow-through) or another modality (CT, MRI, ultrasound, endoscopy, wireless motility capsule). The app teaches that, then offers a barium mode so the lumen *does* light up, the way fluoroscopy does.
 
@@ -42,7 +42,7 @@ apps/digestive/js/
   ui.js
 data/foods.json               ← the food catalog
 data/organs.json              ← lengths, pH, secretions, transit bands
-data/exports.json             ← packet bus (glucose, chyle, urea, 5-HT, …)
+data/exchange.json            ← packet bus both ways (imports + exports)
 ```
 
 Later: `apps/circulatory/`, etc., plus a hub `index.html` that is the body map.
@@ -290,27 +290,42 @@ Each result line cites the mechanism in plain language (“oligosaccharides in b
 
 ## 5b. Other body systems (the packet bus)
 
-Digestion is a factory. The other BODY apps are destinations. Full map: [`docs/digestive/other-systems.md`](docs/digestive/other-systems.md).
+The gut is a factory **and** a customer. Full map: [`docs/digestive/other-systems.md`](docs/digestive/other-systems.md).
 
-**Fourth view: Exports.** When absorption starts, particles split at the villus:
+**Who eats:** nervous system wants it, musculoskeletal delivers it, teeth break it, epiglottis keeps the airway, digestive **receives**. Cephalic phase (see/smell → saliva and acid) is the import that happens *before* the bite.
 
-- **Portal vein (red)** — sugars, amino acids, water, salts, iron, alcohol → **liver first**, then heart, then tissues. ~25% of cardiac output is splanchnic while you rest-and-digest.
-- **Lacteals (cream)** — chylomicrons + A/D/E/K → lymph → thoracic duct → left subclavian → heart. Fat does not take the portal shortcut.
-- **Signals, not food** — CCK/GLP-1/PYY/ghrelin, vagus, ENS, GALT sampling, colonic H₂ that shows up on a breath test.
+**Fourth view: Exchange** (Imports / Exports / Both).
 
-System chips around the silhouette (circulatory, lymph, nervous, endocrine, immune, respiratory, muscle/bone, urinary, skin, reproductive). Hover = one sentence. Click = isolate that stream + “opens in BODY / {system} later.”
+**Imports** (on before the swallow, and the whole meal):
+
+- Hunger + hands-to-mouth + chew (not digestive-owned)
+- Arterial blood into the wall and glands (O₂, water, salts, glutamine)
+- ~6–7 L/day of juices secreted **from plasma into the lumen**, then mostly taken back. Only ~2 L was the glass. Stool keeps ~0.1–0.2 L.
+- Bilirubin from dead red cells → bile → brown
+- Activated vitamin D from kidney (skin started it) → calcium absorption
+- Colonocytes eating butyrate the microbes made from leftovers
+
+**Exports** (when absorption starts):
+
+- **Portal vein (red)** — sugars, amino acids, water, salts, iron, alcohol → **liver first**, then heart. ~25% of cardiac output is splanchnic while you rest-and-digest.
+- **Lacteals (cream)** — chylomicrons + A/D/E/K → lymph → thoracic duct → blood. Fat does not take the portal shortcut.
+- **Signals** — CCK/GLP-1/PYY/ghrelin, vagus, ENS, GALT, colonic H₂ on the breath.
+
+System chips around the silhouette. Hover = one sentence. Click = isolate that stream + “opens in BODY / {system} later.”
 
 Hard rules (also in the map file):
 
 - Food in the lumen is **outside the body** until it crosses mucosa.
-- Gut serotonin (~90–95% of body 5-HT) runs motility; **it does not cross the BBB**; do not animate lunch as a mood shot.
-- Do not print “70% of the immune system is in the gut.” Say largest **mucosal** immune site.
+- Most lumen fluid is an **import from blood**, not from the drink.
+- The digestive system does not eat. It receives.
+- Gut serotonin (~90–95% of body 5-HT) runs motility; **it does not cross the BBB**.
+- Do not print “70% of the immune system is in the gut.”
 - One meal fills short-term packets. Long-term system effects need “if I ate like this every day.”
 - No detox-juice, leaky-gut-explains-everything, or food-flying-into-a-uterus.
 
-`food-engine.js` emits `exports[]`. Later apps consume the same IDs. If two apps disagree, `other-systems.md` wins until a better primary source moves the grade.
+`food-engine.js` emits `imports[]` and `exports[]`. Later apps are suppliers *and* destinations. If two apps disagree, `other-systems.md` wins until a better primary source moves the grade.
 
-Build order after digestive Phase 4: circulatory (most packets) → endocrine (glucose curve) → nervous (kill the serotonin cartoon early) → urinary (urea/water) → the rest.
+Build order after digestive Phase 4b: circulatory (biggest pipe both ways) → endocrine (glucose curve) → nervous (hunger + kill the serotonin cartoon) → urinary (urea out, vitamin D in) → the rest.
 
 ---
 
@@ -411,11 +426,12 @@ Research, sources, this plan, food-engine spec, other-systems map.
 
 - Villus split: portal vs lacteal
 - System chips + hover copy from `other-systems.md`
+- **Imports on:** cephalic drool, arterial juice secretion, “the gut did not decide to eat”
 - Breath-hydrogen tag on the lungs when beans ferment
 - Satiety/vagus tag on the brain; caption that gut 5-HT stays in the gut
 - “Every day” pattern lights bone/vessel/fertility chips without claiming one bite did it
 
-**Done when:** pizza makes cream lacteals and a delayed portal glucose; rice does not; clicking Circulatory hides the colon fart and shows the liver gate.
+**Done when:** pizza makes cream lacteals and a delayed portal glucose; rice does not; clicking Circulatory shows blood *into* glands as well as sugar *out* through the liver.
 
 ### Phase 5 — sound + juice
 
@@ -444,6 +460,7 @@ Do not start circulatory until digestive Phase 4b is true.
 - Ship a food database scraped from a copyrighted FODMAP app. Public classes + USDA macros only.
 - Equate gut serotonin with mood, or print “70% of immunity is in the gut.”
 - Draw food depositing itself into muscle, uterus, or arteries, skipping blood.
+- Treat the digestive system as the thing that eats. It receives. Nervous + musculoskeletal eat.
 
 ---
 
@@ -469,6 +486,6 @@ A user drops a burrito (tortilla + beans + cheese + salsa) into the mouth and ca
 6. A Bristol type that is softer than rice-alone, with a fart if gas units say so.
 7. An x-ray toggle where the burrito vanishes and barium (if enabled) is what you actually track.
 8. A short-term panel (gas, stool, timing) and a long-term panel that only speaks if they say “every day.”
-9. Exports view: glucose/amino acids through the **liver** before the heart; fat through **lacteals**; a system chip that explains why the brain, bone, kidney, or immune tissue cares — without a mood-serotonin lie.
+9. Exchange view: juices pouring in from blood; glucose/amino acids out through the **liver**; fat through **lacteals**; a chip that says who wanted the meal (brain + hands, not the colon).
 
 If that loop is true, this is the most visual digestive system worth building. Then we do the heart.

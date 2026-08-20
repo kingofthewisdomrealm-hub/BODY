@@ -1,0 +1,163 @@
+{
+	"note": "Macros are USDA FoodData Central typical values per listed serving. FODMAP fields are public class intensities 0–3, not Monash app cutoffs.",
+	"foods": [
+		{
+			"id": "water",
+			"name": "Water",
+			"serving": "250 ml",
+			"servingG": 250,
+			"macros": { "water": 250, "protein": 0, "fat": 0, "carb": 0, "fiber": 0, "addedSugar": 0 },
+			"fiber": { "soluble": 0, "insoluble": 0 },
+			"fodmap": { "lactose": 0, "fructoseExcess": 0, "fructans": 0, "gos": 0, "polyols": 0 },
+			"flags": ["liquid"],
+			"chew": "liquid",
+			"gastricEmptying": "fast",
+			"color": "#7eb6d9",
+			"ingredients": [{ "id": "water", "name": "Water", "g": 250 }]
+		},
+		{
+			"id": "white-rice",
+			"name": "White rice",
+			"serving": "1 cup cooked",
+			"servingG": 158,
+			"macros": { "water": 108, "protein": 4.3, "fat": 0.4, "carb": 44.5, "fiber": 0.6, "addedSugar": 0 },
+			"fiber": { "soluble": 0.1, "insoluble": 0.5 },
+			"fodmap": { "lactose": 0, "fructoseExcess": 0, "fructans": 0, "gos": 0, "polyols": 0 },
+			"flags": ["starch"],
+			"chew": "soft",
+			"gastricEmptying": "neutral",
+			"color": "#e8dcc8",
+			"usdaFdcId": "168878",
+			"ingredients": [{ "id": "rice-starch", "name": "Cooked rice starch", "g": 158 }]
+		},
+		{
+			"id": "oats",
+			"name": "Oatmeal",
+			"serving": "1 cup cooked",
+			"servingG": 234,
+			"macros": { "water": 197, "protein": 5.9, "fat": 3.6, "carb": 28.1, "fiber": 4.0, "addedSugar": 0 },
+			"fiber": { "soluble": 1.8, "insoluble": 2.2 },
+			"fodmap": { "lactose": 0, "fructoseExcess": 0, "fructans": 0, "gos": 0, "polyols": 0 },
+			"flags": ["starch", "whole-grain"],
+			"chew": "soft",
+			"gastricEmptying": "neutral",
+			"color": "#c4a574",
+			"ingredients": [{ "id": "oat", "name": "Oats + water", "g": 234 }]
+		},
+		{
+			"id": "black-beans",
+			"name": "Black beans",
+			"serving": "1/2 cup cooked",
+			"servingG": 86,
+			"macros": { "water": 57, "protein": 7.6, "fat": 0.5, "carb": 20.4, "fiber": 7.5, "addedSugar": 0 },
+			"fiber": { "soluble": 2.0, "insoluble": 5.5 },
+			"fodmap": { "lactose": 0, "fructoseExcess": 0, "fructans": 0, "gos": 3, "polyols": 0 },
+			"flags": ["legume"],
+			"chew": "dense",
+			"gastricEmptying": "neutral",
+			"color": "#2a1f1a",
+			"ingredients": [{ "id": "bean", "name": "Black beans (GOS + fiber)", "g": 86 }]
+		},
+		{
+			"id": "broccoli",
+			"name": "Broccoli",
+			"serving": "1 cup chopped",
+			"servingG": 91,
+			"macros": { "water": 81, "protein": 2.6, "fat": 0.3, "carb": 6.0, "fiber": 2.4, "addedSugar": 0 },
+			"fiber": { "soluble": 0.4, "insoluble": 2.0 },
+			"fodmap": { "lactose": 0, "fructoseExcess": 0, "fructans": 2, "gos": 0, "polyols": 0 },
+			"flags": ["crucifer"],
+			"chew": "crunch",
+			"gastricEmptying": "neutral",
+			"color": "#3d7a45",
+			"ingredients": [{ "id": "broccoli", "name": "Broccoli (fiber + fructans)", "g": 91 }]
+		},
+		{
+			"id": "apple",
+			"name": "Apple",
+			"serving": "1 medium",
+			"servingG": 182,
+			"macros": { "water": 156, "protein": 0.5, "fat": 0.3, "carb": 25.1, "fiber": 4.4, "addedSugar": 0 },
+			"fiber": { "soluble": 1.5, "insoluble": 2.9 },
+			"fodmap": { "lactose": 0, "fructoseExcess": 2, "fructans": 0, "gos": 0, "polyols": 2 },
+			"flags": ["fruit"],
+			"chew": "crunch",
+			"gastricEmptying": "neutral",
+			"color": "#c45a4a",
+			"ingredients": [
+				{ "id": "apple-flesh", "name": "Flesh (fructose + water)", "g": 160 },
+				{ "id": "apple-skin", "name": "Skin (fiber)", "g": 22 }
+			]
+		},
+		{
+			"id": "milk",
+			"name": "Whole milk",
+			"serving": "1 cup",
+			"servingG": 244,
+			"macros": { "water": 215, "protein": 8.0, "fat": 8.0, "carb": 12.0, "fiber": 0, "addedSugar": 0 },
+			"fiber": { "soluble": 0, "insoluble": 0 },
+			"fodmap": { "lactose": 3, "fructoseExcess": 0, "fructans": 0, "gos": 0, "polyols": 0 },
+			"flags": ["liquid", "dairy"],
+			"chew": "liquid",
+			"gastricEmptying": "fast",
+			"color": "#f2efe6",
+			"ingredients": [
+				{ "id": "lactose", "name": "Lactose", "g": 12 },
+				{ "id": "milk-fat", "name": "Milk fat", "g": 8 },
+				{ "id": "milk-protein", "name": "Casein + whey", "g": 8 }
+			]
+		},
+		{
+			"id": "steak",
+			"name": "Steak",
+			"serving": "6 oz cooked",
+			"servingG": 170,
+			"macros": { "water": 95, "protein": 44, "fat": 12, "carb": 0, "fiber": 0, "addedSugar": 0 },
+			"fiber": { "soluble": 0, "insoluble": 0 },
+			"fodmap": { "lactose": 0, "fructoseExcess": 0, "fructans": 0, "gos": 0, "polyols": 0 },
+			"flags": ["meat"],
+			"chew": "dense",
+			"gastricEmptying": "slow",
+			"color": "#7a2e2e",
+			"ingredients": [
+				{ "id": "muscle-protein", "name": "Muscle protein", "g": 44 },
+				{ "id": "steak-fat", "name": "Fat", "g": 12 }
+			]
+		},
+		{
+			"id": "pizza",
+			"name": "Cheese pizza",
+			"serving": "1 slice",
+			"servingG": 107,
+			"macros": { "water": 45, "protein": 12, "fat": 10, "carb": 33, "fiber": 2.5, "addedSugar": 3 },
+			"fiber": { "soluble": 0.6, "insoluble": 1.9 },
+			"fodmap": { "lactose": 1, "fructoseExcess": 0, "fructans": 2, "gos": 0, "polyols": 0 },
+			"flags": ["mixed", "upf"],
+			"chew": "dense",
+			"gastricEmptying": "slow",
+			"color": "#d4a24c",
+			"ingredients": [
+				{ "id": "crust", "name": "Wheat crust (starch + fructans)", "g": 55 },
+				{ "id": "cheese", "name": "Cheese (fat + lactose)", "g": 30 },
+				{ "id": "sauce", "name": "Tomato sauce", "g": 22 }
+			]
+		},
+		{
+			"id": "cola",
+			"name": "Cola",
+			"serving": "12 oz",
+			"servingG": 368,
+			"macros": { "water": 330, "protein": 0, "fat": 0, "carb": 39, "fiber": 0, "addedSugar": 39 },
+			"fiber": { "soluble": 0, "insoluble": 0 },
+			"fodmap": { "lactose": 0, "fructoseExcess": 1, "fructans": 0, "gos": 0, "polyols": 0 },
+			"flags": ["liquid", "carbonated", "upf"],
+			"chew": "liquid",
+			"gastricEmptying": "fast",
+			"color": "#3b2218",
+			"ingredients": [
+				{ "id": "hfcs", "name": "Added sugar", "g": 39 },
+				{ "id": "co2", "name": "Dissolved CO₂", "g": 2 }
+			]
+		}
+	]
+}

@@ -99,9 +99,24 @@ Play flatus only if `gas` crosses threshold **and** leftover is colonic (hours l
 
 ---
 
-## Exports
+## Exchange packets
 
-After absorption, emit the packet list in `other-systems.md` §13 (`glucose`, `amino-acids`, `chylomicrons`, `iron`, `urea`, `h2`, …). Destination chips read that array. Later BODY apps subscribe to the same IDs.
+After absorption, emit `exports[]` from [`other-systems.md`](other-systems.md) §13. Before and during the meal, emit `imports[]`:
+
+```
+imports: [
+  { id: 'oral-intake', via: 'mouth', from: ['outside'] },
+  { id: 'hunger-command', via: 'nervous', from: ['nervous', 'endocrine-ghrelin'] },
+  { id: 'mastication', via: 'msk-skeletal', from: ['musculoskeletal', 'skeletal'] },
+  { id: 'cephalic-phase', via: 'vagus', from: ['nervous'] },
+  { id: 'plasma-water-salts', via: 'arterial', from: ['circulatory'] },
+  { id: 'oxygen', via: 'arterial', from: ['respiratory', 'circulatory'] },
+  { id: 'glutamine-wall-fuel', via: 'arterial', from: ['circulatory'] },
+  { id: 'bilirubin', via: 'bile', from: ['circulatory-heme'] },
+  { id: 'vit-d-active', via: 'blood', from: ['skin', 'urinary'] },
+  { id: 'butyrate', via: 'colon-lumen', from: ['microbes'] }
+]
+```
 
 ---
 
