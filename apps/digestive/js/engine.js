@@ -184,15 +184,17 @@ function mix(ids, options = {}) {
 		if (f.chew === 'dense' || f.chew === 'crunch') chew = f.chew
 		if (f.chew === 'liquid' && chew === 'soft') chew = 'liquid'
 	})
+	if (!foods.length) {
+		return emptyMeal(lactase, sensitivity)
+	}
 	if (foods.length > 1) color = mixHex(foods.map((f) => f.color))
 	const fermentable = fodmap.gos + fodmap.fructans + fodmap.polyols + fodmap.fructoseExcess + (lactase ? 0 : fodmap.lactose)
-	const fatSlow = 1 + macros.fat / 28
-	const liquidFast = flags.has('liquid') && macros.fat < 3 && macros.protein < 4 ? 0.35 : 1
-	const t50h = clamp(2.7 * fatSlow * liquidFast, 0.25, 6.5)
+	const t50h = emptyingT50(macros, flags)
 	const t50Complete = t50h * 1.7
 	const siTransitH = 4.6
 	const colonH = 32 - Math.min(8, fiber.insoluble * 1.1)
-	return {
+	const wholeGutH = t50h + siTransitH + colonH * 0.55
+	const meal = {
 		foods,
 		ids,
 		macros,
@@ -209,8 +211,243 @@ function mix(ids, options = {}) {
 		t50Complete,
 		siTransitH,
 		colonH,
-		carbonated: flags.has('carbonated')
+		wholeGutH,
+		carbonated: flags.has('carbonated'),
+		glucose: glucoseShape(macros, fiber),
+		satiety: satietyOf(macros, fiber)
 	}
+	meal.lessons = comboLessons(meal)
+	return meal
+}
+
+function emptyMeal(lactase, sensitivity) {
+	const macros = { water: 0, protein: 0, fat: 0, carb: 0, fiber: 0, addedSugar: 0 }
+	return {
+		foods: [],
+		ids: [],
+		macros,
+		fiber: { soluble: 0, insoluble: 0 },
+		fodmap: { lactose: 0, fructoseExcess: 0, fructans: 0, gos: 0, polyols: 0 },
+		flags: new Set(),
+		ingredients: [],
+		color: '#e8dcc8',
+		chew: 'soft',
+		lactase,
+		sensitivity,
+		fermentable: 0,
+		t50h: 2.7,
+		t50Complete: 4.6,
+		siTransitH: 4.6,
+		colonH: 32,
+		wholeGutH: 24,
+		carbonated: false,
+		glucose: 'low',
+		satiety: 'none',
+		lessons: []
+	}
+}
+
+function emptyingT50(macros, flags) {
+	const fatSlow = 1 + macros.fat / 28
+	const liquidFast = flags.has('liquid') && macros.fat < 3 && macros.protein < 4 ? 0.35 : 1
+	return clamp(2.7 * fatSlow * liquidFast, 0.25, 6.5)
+}
+
+function glucoseShape(macros, fiber) {
+	const starch = Math.max(0, macros.carb - macros.fiber - macros.addedSugar)
+	const brake = macros.fat + macros.protein + fiber.soluble * 4
+	if (macros.addedSugar >= 20 && brake < 12) return 'spike'
+	if (macros.carb >= 22 && brake >= 16) return 'blunted'
+	if (macros.carb < 8) return 'low'
+	if (starch >= 30 && macros.fiber < 2) return 'fast-starch'
+	return 'steady'
+}
+
+function satietyOf(macros, fiber) {
+	const score = macros.protein * 1.2 + macros.fat * 0.8 + fiber.soluble * 3 + fiber.insoluble * 1.5 + macros.water * 0.01
+	if (score < 8) return 'thin'
+	if (score < 28) return 'solid'
+	return 'heavy'
+}
+
+function comboLessons(meal) {
+	const ids = new Set(meal.ids)
+	const lessons = []
+	const solos = meal.foods.map((f) => emptyingT50(f.macros, new Set(f.flags)))
+	const fastest = solos.length ? Math.min(...solos) : meal.t50h
+	const names = meal.foods.map((f) => f.name).join(' + ')
+
+	if (meal.foods.length > 1 && meal.t50h > fastest * 1.2) {
+		lessons.push({
+			id: 'together-linger',
+			title: 'Together they linger',
+			text: `Alone, the fastest item here would be half-gone from the stomach in ~${fastest.toFixed(1)} h. As one swallow, 50% emptying is ~${meal.t50h.toFixed(1)} h. Fat and protein in the mix hold the pylorus — everyone waits.`,
+			better: 'That slower clock is why a mixed plate holds you longer than a sugary drink. The calories still all count.',
+			grade: 'robust'
+		})
+	}
+
+	if (ids.has('black-beans') && ids.has('white-rice')) {
+		lessons.push({
+			id: 'beans-rice',
+			title: 'Beans + rice',
+			text: 'Rice starch is quiet in the colon. Bean GOS is not — bacteria will make gas either way. Together they cover amino acids better than either alone, and the fiber + water help stool bulk.',
+			better: 'A classic plate: plant protein, slower energy than rice solo, some gas as the price of the fiber.',
+			grade: 'range'
+		})
+	}
+
+	if (ids.has('pizza') && ids.has('cola')) {
+		lessons.push({
+			id: 'pizza-cola',
+			title: 'Pizza + cola',
+			text: 'Fat in the slice delays emptying. Cola is still ~39 g added sugar with no fiber. The sugar is not cancelled — it just arrives later, on top of refined starch.',
+			better: 'If you want the slice, water instead of cola cuts the liquid-sugar dump. The pizza is already a mixed meal.',
+			grade: 'robust'
+		})
+	}
+
+	if (ids.has('cola') && meal.foods.length === 1) {
+		lessons.push({
+			id: 'cola-solo',
+			title: 'Liquid sugar, no brakes',
+			text: 'No chew, no fiber, almost no fat or protein. Stomach emptying is fast. The small bowel sees a sugar flood. Satiety is thin — you can drink a meal’s carbs without feeling fed.',
+			better: 'Pair sugar with protein, fat, or fiber, or skip the drink. Water has no carb clock.',
+			grade: 'robust'
+		})
+	}
+
+	if (ids.has('steak') && meal.macros.fiber < 2) {
+		lessons.push({
+			id: 'steak-no-plant',
+			title: 'Protein without bulk',
+			text: 'Steak is slow: pepsin, fat, hours in the J. Almost no fiber, so the colon has little leftover to ferment or bulk. Stool prior leans drier.',
+			better: 'Add broccoli, beans, apple, or oats. The plant is the colon’s job; the steak is the stomach’s.',
+			grade: 'range'
+		})
+	}
+
+	if (ids.has('steak') && (ids.has('broccoli') || ids.has('black-beans') || ids.has('apple') || ids.has('oats'))) {
+		lessons.push({
+			id: 'steak-plant',
+			title: 'Meat + plant',
+			text: 'Fat and protein keep this meal in the stomach longer. Fiber from the plant keeps moving once it hits the colon. That is a more complete digestive job than steak alone.',
+			better: 'This is the “eat better” pattern on this plate: slow protein, some bulk, fewer empty hours.',
+			grade: 'robust'
+		})
+	}
+
+	if (ids.has('black-beans') && ids.has('broccoli')) {
+		lessons.push({
+			id: 'double-fodmap',
+			title: 'Two fermentable plants',
+			text: 'Bean GOS + broccoli fructans. The small bowel cannot finish them. Colon bacteria will. Gas here is leftover carbohydrate working, not a toxin.',
+			better: 'Loud, not dangerous, in a typical adult. If you are mapping your own gut, this combo is a high-signal test.',
+			grade: 'robust'
+		})
+	}
+
+	if (ids.has('milk') && !meal.lactase) {
+		lessons.push({
+			id: 'lactose-off',
+			title: 'Lactose with no lactase',
+			text: 'Milk sugar stays in the lumen, pulls water, and ferments. Bristol prior goes looser. Beans still ferment even with lactase on — this is a different leftover.',
+			better: 'Lactase-on milk is just protein, fat, and sugar absorbed. The toggle is a model of the enzyme, not a diagnosis.',
+			grade: 'robust'
+		})
+	}
+
+	if (ids.has('milk') && (ids.has('black-beans') || ids.has('steak'))) {
+		lessons.push({
+			id: 'calcium-iron',
+			title: 'Calcium in the same swallow',
+			text: 'Dairy calcium can compete with iron at the same meal. Heme iron in steak still absorbs better than bean iron. This is a timing nibble, not a reason to fear milk.',
+			better: 'If you are eating for iron, a plant+meat plate without a big dairy pour at the same moment is the cautious pattern.',
+			grade: 'range'
+		})
+	}
+
+	if (ids.has('broccoli') && ids.has('black-beans') && !ids.has('steak')) {
+		lessons.push({
+			id: 'nonheme-c',
+			title: 'Plant iron + broccoli',
+			text: 'Non-heme iron in beans is picky. Vitamin C in broccoli helps that pathway. Still a model, still not a lab result.',
+			better: 'A beans-and-green plate is doing more than “fiber.”',
+			grade: 'range'
+		})
+	}
+
+	if (ids.has('oats') && (ids.has('apple') || ids.has('white-rice') || ids.has('cola'))) {
+		lessons.push({
+			id: 'beta-glucan',
+			title: 'Oat glue on the starch',
+			text: 'Soluble oat fiber thickens the meal. Glucose from rice, apple, or cola has more brake than it would solo. Apple still brings polyols that the colon may notice.',
+			better: 'This is how “slow carb” actually looks: not magic — viscosity and emptying.',
+			grade: 'robust'
+		})
+	}
+
+	if (meal.macros.fiber >= 3 && meal.macros.water < 80) {
+		lessons.push({
+			id: 'fiber-thirst',
+			title: 'Fiber without water',
+			text: 'Insoluble fiber wants water to bulk. Dry fiber plus fat can lean the Bristol prior harder, not softer.',
+			better: 'Drink with the plants. Water on this plate is a nutrient for stool, not a garnish.',
+			grade: 'range'
+		})
+	}
+
+	if (meal.macros.fiber >= 3 && meal.macros.water >= 150) {
+		lessons.push({
+			id: 'fiber-water',
+			title: 'Fiber + water',
+			text: 'This is the bulk recipe: leftover plant + fluid. Colon transit model shortens a little. Stool prior toward a formed sausage.',
+			better: 'A pattern, not one poop. Repeat meals like this, not one heroic apple.',
+			grade: 'range'
+		})
+	}
+
+	if (meal.glucose === 'spike') {
+		lessons.push({
+			id: 'glucose-spike',
+			title: 'Fast glucose',
+			text: 'High added sugar, weak protein/fat/fiber brakes. Emptying is quick. The portal vein sees a steep curve.',
+			better: 'Add steak, oats, beans, or skip the liquid sugar. The model is teaching the brake, not a diet religion.',
+			grade: 'robust'
+		})
+	}
+
+	if (meal.glucose === 'blunted' && meal.foods.length > 1) {
+		lessons.push({
+			id: 'glucose-blunt',
+			title: 'Same carbs, slower curve',
+			text: 'There is still carbohydrate here — but fat, protein, or soluble fiber is sharing the swallow. Emptying and viscosity flatten the hit compared with the sugar or white starch alone.',
+			better: 'This is the useful combo: not “no carbs,” but carbs that do not arrive as a flood.',
+			grade: 'robust'
+		})
+	}
+
+	if (ids.has('white-rice') && meal.foods.length === 1) {
+		lessons.push({
+			id: 'rice-solo',
+			title: 'Quiet starch',
+			text: 'Easy mush, little fiber, little ferment. Colon stays relatively quiet. Stomach is not delayed. Satiety is only so-so.',
+			better: 'Rice plus beans or broccoli turns a fast starch into a meal.',
+			grade: 'range'
+		})
+	}
+
+	if (!lessons.length && meal.foods.length) {
+		lessons.push({
+			id: 'watch-the-clock',
+			title: names || 'This plate',
+			text: `Protein ${meal.macros.protein.toFixed(0)} g, fat ${meal.macros.fat.toFixed(0)} g, carb ${meal.macros.carb.toFixed(0)} g, fiber ${meal.macros.fiber.toFixed(1)} g. Stomach half-empty ~${meal.t50h.toFixed(1)} h. Whole-gut model ~${meal.wholeGutH.toFixed(0)} h.`,
+			better: 'Click a second food. Combinations change the clock more than most people expect.',
+			grade: 'model'
+		})
+	}
+
+	return lessons.slice(0, 4)
 }
 
 function bristolOf(meal) {

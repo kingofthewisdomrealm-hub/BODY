@@ -1,4 +1,5 @@
-const selected = new Set(['white-rice'])
+const MAX_PLATE = 4
+const selected = new Set()
 const ui = {
 	lactase: true,
 	muted: false,
@@ -62,11 +63,13 @@ function $(sel) {
 }
 
 function foodName() {
-	return meal.foods[0] ? meal.foods[0].name : 'the bite'
+	if (!meal.foods.length) return 'the bite'
+	if (meal.foods.length === 1) return meal.foods[0].name
+	return meal.foods.map((f) => f.name).join(' + ')
 }
 
 function foodId() {
-	return meal.foods[0] ? meal.foods[0].id : ''
+	return meal.foods.length === 1 ? meal.foods[0].id : 'combo'
 }
 
 function say(title, text) {
@@ -102,7 +105,8 @@ function togglePause() {
 
 function renderTray() {
 	const tray = $('#tray')
-	tray.innerHTML = '<h2>Plate · drag to mouth</h2>' + FOODS.map((f) => {
+	const n = selected.size
+	tray.innerHTML = `<h2>Plate · click to add · ${n}/${MAX_PLATE}</h2>` + FOODS.map((f) => {
 		const on = selected.has(f.id)
 		return `<button class="food ${on ? 'on' : ''}" data-id="${f.id}" draggable="true" style="--c:${f.color}">
 			<span class="swatch"></span>
@@ -113,11 +117,11 @@ function renderTray() {
 	tray.querySelectorAll('.food').forEach((btn) => {
 		const id = btn.dataset.id
 		btn.addEventListener('click', () => {
-			selected.clear()
-			selected.add(id)
+			if (selected.has(id)) selected.delete(id)
+			else if (selected.size < MAX_PLATE) selected.add(id)
 			rebuildMeal()
 			renderTray()
-			if (ui.phase === 'idle') paint()
+			paint()
 		})
 		btn.addEventListener('dragstart', (e) => {
 			audio.unlock()
@@ -127,6 +131,11 @@ function renderTray() {
 		})
 		btn.addEventListener('dragend', () => document.body.classList.remove('dragging'))
 	})
+	const eat = $('#eat')
+	if (eat) {
+		eat.disabled = n === 0
+		eat.textContent = n > 1 ? 'Eat this plate' : (n === 1 ? 'Eat selected' : 'Build a plate')
+	}
 }
 
 function rebuildMeal() {
@@ -138,11 +147,9 @@ function rebuildMeal() {
 }
 
 function startEating(id) {
-	if (id) {
-		selected.clear()
-		selected.add(id)
-		renderTray()
-	}
+	if (id) selected.add(id)
+	if (!selected.size) return
+	renderTray()
 	rebuildMeal()
 	ui.log = []
 	ui.sparks = []
@@ -156,13 +163,15 @@ function startEating(id) {
 	ui.bilePlayed = false
 	ui.acidPlayed = false
 	ui.gurgleAcc = 0
-	ui.chewFor = meal.chew === 'liquid' ? 1.4 : meal.chew === 'dense' ? 5.2 : 3.8
+	const extra = Math.max(0, meal.foods.length - 1) * 0.55
+	ui.chewFor = (meal.chew === 'liquid' ? 1.4 : meal.chew === 'dense' ? 5.2 : 3.8) + extra
 	lastTick = performance.now()
 	audio.unlock()
 	audio.setMuted(ui.muted)
 	if (meal.chew === 'liquid') audio.slurp()
-	say('Bite', chewCall().line)
-	$('#eat').textContent = 'Eating…'
+	say(meal.foods.length > 1 ? 'Together' : 'Bite', chewCall().line)
+	const eat = $('#eat')
+	if (eat) eat.textContent = 'Eating…'
 	syncPause()
 	syncProgress()
 }
@@ -495,19 +504,27 @@ function drawGrabber(g) {
 
 function drawChew(g) {
 	const p = Math.min(1, ui.hours / ui.chewFor)
-	const mush = lerpColor(meal.color, '#d4c4a8', Math.min(1, p * 1.3))
+	const foods = meal.foods.length ? meal.foods : [{ color: meal.color }]
 	if (meal.chew === 'liquid' || p > 0.78) {
 		const r = 16 - p * 6
-		g.appendChild(blob(MOUTH.x, MOUTH.y + p * 4, r, mush, 0.95))
+		g.appendChild(blob(MOUTH.x, MOUTH.y + p * 4, r, lerpColor(meal.color, '#d4c4a8', Math.min(1, p * 1.1)), 0.95))
+		if (foods.length > 1 && p < 0.95) {
+			foods.forEach((f, i) => {
+				const ang = (i / foods.length) * Math.PI * 2
+				g.appendChild(blob(MOUTH.x + Math.cos(ang) * 5, MOUTH.y + Math.sin(ang) * 3, 3.2, f.color, 0.8))
+			})
+		}
 		return
 	}
-	const n = p < 0.22 ? 1 : 8
+	const n = p < 0.22 ? foods.length : Math.max(8, foods.length * 3)
 	for (let i = 0; i < n; i++) {
-		const ang = (i / 8) * Math.PI * 2 + ui.hours * 3
-		const spread = p < 0.22 ? 0 : 10 + p * 8
+		const food = foods[i % foods.length]
+		const mush = lerpColor(food.color, '#d4c4a8', Math.min(1, p * 1.3))
+		const ang = (i / n) * Math.PI * 2 + ui.hours * 3
+		const spread = p < 0.22 ? 4 : 10 + p * 8
 		const x = MOUTH.x + Math.cos(ang) * spread
 		const y = MOUTH.y + Math.sin(ang) * (spread * 0.45) + ui.jawT * 0.4
-		const r = (14 - p * 9) * (n === 1 ? 1 : 0.55)
+		const r = (14 - p * 9) * (p < 0.22 ? 0.7 : 0.5)
 		g.appendChild(blob(x, y, r, mush, 0.92))
 	}
 	if (p > 0.2 && p < 0.75) {
@@ -554,7 +571,7 @@ function drawGut(g, state) {
 		const y = pt.y + Math.cos(i * 1.3 + ui.hours * 0.8) * (churn * 0.7)
 		const mushR = state.stage === 'stomach' ? 5.5 : 3.4
 		const r = kind === 'fiber' ? mushR + 0.8 : mushR * (1 - absorb * 0.7)
-		const c = barium ? '#e8eef2' : particleColor(state, kind)
+		const c = barium ? '#e8eef2' : particleColor(state, kind, i)
 		g.appendChild(blob(x, y, r, c, barium ? 0.9 : 0.88))
 	}
 
@@ -648,13 +665,15 @@ function particleU(state, i, kind) {
 	return 0.62 + Math.min(0.37, colU * 0.36)
 }
 
-function particleColor(state, kind) {
-	if (state.stage === 'colon' || state.stage === 'rectum') return '#6b4a32'
-	if (state.stage === 'stomach') return lerpColor(meal.color, '#c4b08a', 0.75)
-	if (kind === 'fat') return '#e6d48a'
-	if (kind === 'protein') return '#c98580'
-	if (kind === 'fiber') return meal.color
-	return lerpColor(meal.color, '#d2c2a6', 0.4)
+function particleColor(state, kind, i) {
+	const food = meal.foods.length ? meal.foods[i % meal.foods.length] : null
+	const base = food ? food.color : meal.color
+	if (state.stage === 'colon' || state.stage === 'rectum') return lerpColor(base, '#6b4a32', 0.82)
+	if (state.stage === 'stomach') return lerpColor(base, '#c4b08a', 0.55)
+	if (kind === 'fat') return lerpColor(base, '#e6d48a', 0.7)
+	if (kind === 'protein') return lerpColor(base, '#c98580', 0.55)
+	if (kind === 'fiber') return base
+	return lerpColor(base, '#d2c2a6', 0.35)
 }
 
 function lerpColor(a, b, t) {
@@ -672,6 +691,12 @@ function hexRgb(h) {
 }
 
 function chewCall() {
+	if (meal.foods.length > 1) {
+		return {
+			title: 'Together',
+			line: `${foodName()} hit the teeth as one swallow. Different textures, one bolus. Fat and fiber on this plate will set the pace for everyone — the fast item does not get to cut the line.`
+		}
+	}
 	const name = foodName()
 	const lines = {
 		water: { title: 'A sip', line: `${name}. No chew. Just a cold swallow lining up at the trapdoor.` },
@@ -689,6 +714,12 @@ function chewCall() {
 }
 
 function mushCall() {
+	if (meal.foods.length > 1) {
+		return {
+			title: 'One mush',
+			line: `${foodName()} are losing their edges. The stomach will not sort them into separate queues. This is one chyme.`
+		}
+	}
 	return {
 		title: 'Mush',
 		line: `It is paste. You could not pick ${foodName()} out of a lineup. Saliva + crushing = a swallowable bolus. Gross. Perfect.`
@@ -698,9 +729,10 @@ function mushCall() {
 function stomachCall() {
 	const fat = meal.macros.fat > 2
 	const pro = meal.macros.protein > 1
+	const combo = meal.foods.length > 1
 	return {
-		title: 'Acid vat',
-		line: `Welcome to the acid vat. pH ~2. This would blister skin. ${pro ? 'Pepsin is unzipping protein like a cheap jacket. ' : ''}${fat ? 'Fat is stalling the exit. ' : ''}Only bits ≲ 2 mm get past the pylorus.`
+		title: combo ? 'Shared acid vat' : 'Acid vat',
+		line: `Welcome to the acid vat. pH ~2. ${combo ? 'Every food on the plate is in here together. ' : ''}${pro ? 'Pepsin is unzipping protein. ' : ''}${fat ? `Fat (${meal.macros.fat.toFixed(0)} g) is stalling the exit for the whole mix — liquids still leak first. ` : ''}Half-empty ~${meal.t50h.toFixed(1)} h. Only bits ≲ 2 mm get past the pylorus.`
 	}
 }
 
@@ -713,10 +745,18 @@ function poopCall(state) {
 
 function boothCopy(state) {
 	if (ui.phase === 'idle') {
+		if (!meal.foods.length) {
+			return {
+				title: 'Build a plate',
+				line: 'Click two, three, four foods. Drop any of them on the mouth. They enter as one meal — fat slows the sugar, fiber rides with the steak, beans ferment whether the rice is quiet or not.',
+				aside: 'The point is to see what combinations do, so the next plate is a better one. Pause is up top. Spacebar works.'
+			}
+		}
+		const lesson = meal.lessons[0]
 		return {
-			title: 'Waiting on a bite',
-			line: 'Drag anything off that plate and drop it on the mouth. I will call the whole trip — chew, mush, acid, heist, fermentation, poop.',
-			aside: 'Hit Pause up top any time the picture gets ahead of the words. Grab the gold ring on the food to drag it along the path. Spacebar works too.'
+			title: lesson ? lesson.title : 'This plate',
+			line: lesson ? lesson.text : `${foodName()} is ready. Drop it on the mouth.`,
+			aside: lesson ? lesson.better : 'Click another food to see how the clock and the leftover change.'
 		}
 	}
 	if (ui.phase === 'chew') {
@@ -755,8 +795,10 @@ function boothCopy(state) {
 		},
 		jejunum: {
 			title: 'The heist',
-			line: 'Watch bits vanish. Red sparks to the liver — sugars and amino acids in the portal vein. Cream sparks up — fat in lacteals, into lymph. Fiber stays in the tube because it cannot cross.',
-			aside: 'The coils are the border between “food” and “you.”'
+			line: meal.foods.length > 1
+				? 'Watch the colors vanish at different jobs. Sugars and amino acids — red sparks to the liver. Fat — cream sparks up through lymph. Fiber from the plants stays in the tube. The mix does not absorb as one blob.'
+				: 'Watch bits vanish. Red sparks to the liver — sugars and amino acids in the portal vein. Cream sparks up — fat in lacteals, into lymph. Fiber stays in the tube because it cannot cross.',
+			aside: glucoseAside()
 		},
 		ileum: {
 			title: 'Last useful bits',
@@ -781,6 +823,15 @@ function boothCopy(state) {
 	}
 }
 
+function glucoseAside() {
+	const g = meal.glucose
+	if (g === 'spike') return 'Glucose shape: steep. Liquid sugar, weak brakes.'
+	if (g === 'blunted') return 'Glucose shape: blunted. Fat/protein/soluble fiber sharing the swallow.'
+	if (g === 'fast-starch') return 'Glucose shape: fast starch. White rice-like, little fiber.'
+	if (g === 'low') return 'Glucose shape: low. This plate is not a carb flood.'
+	return 'Glucose shape: steady. Mixed brakes on the carb.'
+}
+
 function drawBooth(state) {
 	const copy = boothCopy(state)
 	const title = $('#call-title')
@@ -791,12 +842,15 @@ function drawBooth(state) {
 	if (title) title.textContent = copy.title
 	if (line) line.textContent = copy.line
 	if (aside) aside.textContent = copy.aside
+	drawPlateFacts()
 	if (live) {
 		live.textContent = ui.paused ? 'PAUSED' : (ui.playing ? 'LIVE' : 'STANDBY')
 		live.classList.toggle('paused', ui.paused)
 		live.classList.toggle('hot', ui.playing && !ui.paused)
 	}
-	if (ui.phase === 'idle') clock.textContent = 'Drag a food onto the mouth'
+	if (ui.phase === 'idle') clock.textContent = meal.foods.length
+		? `Stomach ½ empty ~${meal.t50h.toFixed(1)} h · gut ~${meal.wholeGutH.toFixed(0)} h`
+		: 'Click foods, then drop them on the mouth'
 	else if (ui.phase === 'chew') clock.textContent = 'Mouth · chewing'
 	else if (ui.phase === 'swallow') clock.textContent = 'Pharynx → esophagus'
 	else clock.textContent = formatHours(state.hours) + '  ·  ' + state.appearance
@@ -818,6 +872,66 @@ function drawBooth(state) {
 		$('#long').hidden = false
 		$('#long').innerHTML = longTerm(meal)
 	} else $('#long').hidden = true
+}
+
+function glucoseWord() {
+	return {
+		spike: 'steep',
+		blunted: 'blunted',
+		'fast-starch': 'fast starch',
+		low: 'low',
+		steady: 'steady'
+	}[meal.glucose] || meal.glucose
+}
+
+function drawPlateFacts() {
+	const macros = $('#macros')
+	const timing = $('#timing')
+	const lessons = $('#lessons')
+	const legend = $('#food-legend')
+	if (!macros) return
+	if (!meal.foods.length) {
+		macros.innerHTML = ''
+		if (timing) timing.innerHTML = ''
+		if (lessons) lessons.innerHTML = ''
+		if (legend) legend.innerHTML = ''
+		return
+	}
+	const m = meal.macros
+	const max = Math.max(m.protein, m.fat, m.carb, m.fiber, m.addedSugar, 1)
+	macros.innerHTML = [
+		['Protein', m.protein, '#c98580'],
+		['Fat', m.fat, '#e6d48a'],
+		['Carb', m.carb, '#d4a24c'],
+		['Fiber', m.fiber, '#7fa07a'],
+		['Sugar+', m.addedSugar, '#c46a4a']
+	].map(([label, g, c]) => {
+		const w = Math.max(8, (g / max) * 100)
+		return `<span><b>${label}</b><i style="width:${w}%;background:${c}"></i>${g.toFixed(g < 10 ? 1 : 0)} g</span>`
+	}).join('')
+	if (timing) {
+		timing.innerHTML = `
+			<div><b>Stomach ½ empty</b>${meal.t50h.toFixed(1)} h</div>
+			<div><b>Small bowel</b>~${meal.siTransitH.toFixed(1)} h</div>
+			<div><b>Colon</b>~${meal.colonH.toFixed(0)} h</div>
+			<div><b>Whole-gut model</b>~${meal.wholeGutH.toFixed(0)} h</div>
+			<div><b>Glucose</b>${glucoseWord()}</div>
+			<div><b>Satiety</b>${meal.satiety}</div>
+		`
+	}
+	if (lessons) {
+		lessons.innerHTML = meal.lessons.map((L) => `
+			<article class="lesson ${L.grade}">
+				<div class="pg">Eat better · ${L.grade === 'robust' ? '✓ physiology' : L.grade}</div>
+				<h3>${L.title}</h3>
+				<p>${L.text}</p>
+				<p class="better">${L.better}</p>
+			</article>
+		`).join('')
+	}
+	if (legend) {
+		legend.innerHTML = meal.foods.map((f) => `<span><i style="background:${f.color}"></i>${f.name}</span>`).join('')
+	}
 }
 
 function formatHours(h) {

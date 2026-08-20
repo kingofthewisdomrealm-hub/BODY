@@ -62,6 +62,7 @@ aside.lab{border-left:1px solid var(--line);overflow:auto;padding:16px 18px 40px
 .proof a{color:var(--gold);font-size:11.5px}
 footer{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:8px 14px;border-top:1px solid var(--line);background:#0b0c10}
 button.eat{background:var(--gold);border:0;color:#17140c;font-weight:700;padding:9px 16px;border-radius:999px;cursor:pointer}
+button.eat:disabled{opacity:.4;cursor:default}
 button.ghost{background:transparent;border:1px solid var(--line);color:var(--ink);padding:7px 12px;border-radius:999px;cursor:pointer}
 button.ghost:disabled{opacity:.35;cursor:default}
 #pause{min-width:92px;border-color:var(--gold);color:var(--gold);font-weight:600}
@@ -106,6 +107,23 @@ body.grabbing-food #journey-guide{opacity:.6;stroke-width:3.5}
 #paused-banner small{display:block;font-family:var(--sans);font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-top:8px}
 body.is-paused #paused-banner{display:block}
 #meal-label,#bristol-read{margin:0 0 8px}
+.macros{display:flex;flex-direction:column;gap:5px;margin:0 0 14px}
+.macros span{display:grid;grid-template-columns:72px 1fr 42px;align-items:center;gap:8px;font-size:11px;color:var(--dim)}
+.macros b{font-weight:600;color:var(--ink);font-size:10px;letter-spacing:.04em;text-transform:uppercase}
+.macros i{display:block;height:6px;border-radius:99px;max-width:100%}
+.timing{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:0 0 16px}
+.timing div{background:#15171f;border:1px solid var(--line);border-radius:8px;padding:7px 8px;font-size:13px;color:var(--ink)}
+.timing b{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);font-weight:500;margin-bottom:2px}
+.lesson{border-left:3px solid var(--gold);background:#14110c;padding:10px 12px;margin-bottom:10px}
+.lesson.range{border-left-color:var(--sky)}
+.lesson.model{border-left-color:var(--faint)}
+.lesson h3{margin:0 0 6px;font-size:15px}
+.lesson p{margin:0 0 6px;font-size:13px;color:var(--dim);line-height:1.45}
+.lesson .better{color:var(--ink);font-size:13px}
+.lesson .pg{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
+#food-legend{position:absolute;left:170px;bottom:36px;display:flex;flex-wrap:wrap;gap:6px;z-index:6;pointer-events:none;max-width:55%}
+#food-legend span{display:flex;align-items:center;gap:5px;background:rgba(12,14,20,.82);border:1px solid var(--line);border-radius:99px;padding:3px 8px;font-size:11px;color:var(--ink)}
+#food-legend i{width:8px;height:8px;border-radius:99px;display:block}
 </style>
 </head>
 <body data-view="anatomy" data-phase="idle">
@@ -136,7 +154,7 @@ body.is-paused #paused-banner{display:block}
 				<span style="left:100%">Out</span>
 			</div>
 		</div>
-		<p class="hint">Drag a food onto the mouth. Grab it on the path to scrub. Pause is up top.</p>
+		<p class="hint">Click several foods, then drag onto the mouth. They digest as one meal.</p>
 		<p class="hint hint-x" style="top:78px">Plain film: gas and bone. The meal is invisible.</p>
 		<svg class="body" viewBox="0 0 640 1080" role="img" aria-label="Digestive organs in a living torso">
 			<defs>
@@ -186,16 +204,18 @@ body.is-paused #paused-banner{display:block}
 					<stop offset="100%" stop-color="#7a2830"/>
 				</radialGradient>
 				<filter id="bump" x="-12%" y="-12%" width="124%" height="124%">
-					<feTurbulence type="fractalNoise" baseFrequency="0.032" numOctaves="3" seed="4" result="noise"/>
-					<feDiffuseLighting in="noise" lighting-color="#fff8f0" surfaceScale="2.6" result="diff">
-						<feDistantLight azimuth="225" elevation="52"/>
+					<feTurbulence type="fractalNoise" baseFrequency="0.024" numOctaves="5" seed="4" result="coarse"/>
+					<feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="11" result="fine"/>
+					<feBlend in="coarse" in2="fine" mode="multiply" result="noise"/>
+					<feDiffuseLighting in="noise" lighting-color="#fff8f0" surfaceScale="2.2" result="diff">
+						<feDistantLight azimuth="225" elevation="48"/>
 					</feDiffuseLighting>
 					<feComposite in="diff" in2="SourceGraphic" operator="in" result="clip"/>
 					<feBlend in="SourceGraphic" in2="clip" mode="soft-light" result="lit"/>
 					<feDropShadow dx="1.6" dy="4.5" stdDeviation="3.2" flood-color="#000" flood-opacity=".42"/>
 				</filter>
 				<filter id="mucosa" x="-8%" y="-8%" width="116%" height="116%">
-					<feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="11" result="n"/>
+					<feTurbulence type="fractalNoise" baseFrequency="1.15" numOctaves="3" seed="11" result="n"/>
 					<feColorMatrix in="n" type="matrix" values="0 0 0 0 0.55  0 0 0 0 0.22  0 0 0 0 0.18  0 0 0 0.18 0"/>
 					<feBlend in="SourceGraphic" mode="multiply"/>
 					<feDropShadow dx="1" dy="3" stdDeviation="2.4" flood-color="#000" flood-opacity=".35"/>
@@ -290,7 +310,7 @@ body.is-paused #paused-banner{display:block}
 					C270 770, 318 792, 358 778
 					C398 764, 430 790, 410 818
 					C390 846, 340 838, 320 860"/>
-				<path fill="none" stroke="#f0c8bc" stroke-width="4" stroke-dasharray="3 11" stroke-linecap="round" opacity=".4" d="M360 455
+				<path fill="none" stroke="#f0c8bc" stroke-width="4" stroke-dasharray="2 7" stroke-linecap="round" opacity=".45" d="M360 455
 					C320 468, 270 458, 248 490
 					C226 522, 270 538, 312 522
 					C354 506, 400 528, 388 562
@@ -379,6 +399,8 @@ body.is-paused #paused-banner{display:block}
 				<path d="M378 362 C410 368, 438 384, 440 404"/>
 				<path d="M372 378 C400 386, 422 400, 418 418"/>
 				<path d="M400 430 C418 438, 428 452, 412 464"/>
+				<path d="M386 340 C418 344, 444 358, 450 378"/>
+				<path d="M368 390 C396 398, 416 412, 408 428"/>
 			</g>
 			<ellipse cx="458" cy="348" rx="22" ry="14" fill="#f7ddd8" opacity=".5"/>
 			<ellipse cx="372" cy="424" rx="10" ry="8" fill="#b85a58" opacity=".45"/>
@@ -391,6 +413,8 @@ body.is-paused #paused-banner{display:block}
 				C100 404, 96 344, 112 296Z"/>
 			<path d="M228 246 C252 292, 258 342, 242 396" fill="none" stroke="#4a1814" stroke-width="2.2" opacity=".4"/>
 			<path d="M168 300 C200 310, 250 318, 300 308" fill="none" stroke="#5c2018" stroke-width="1.4" opacity=".28"/>
+			<path d="M148 280 C190 268, 240 274, 286 292" fill="none" stroke="#5c2018" stroke-width="1.1" opacity=".22"/>
+			<path d="M160 340 C210 352, 260 348, 310 330" fill="none" stroke="#4a1814" stroke-width="1" opacity=".2"/>
 			<ellipse cx="186" cy="268" rx="42" ry="18" fill="#e09078" opacity=".18"/>
 			<ellipse cx="210" cy="360" rx="16" ry="10" fill="#3a1010" opacity=".28"/>
 			<path data-organ="gallbladder" class="organ" filter="url(#depth)" fill="url(#gGB)" d="M236 368 C250 358, 262 368, 260 390 C258 414, 244 428, 228 420 C214 412, 222 376, 236 368Z"/>
@@ -454,6 +478,7 @@ body.is-paused #paused-banner{display:block}
 
 			<g id="bolus-cloud"></g>
 		</svg>
+		<div id="food-legend"></div>
 		<div id="paused-banner">Paused<small>Read the booth · space to resume</small></div>
 		<div id="clock-wrap">
 			<div id="clock">The model is the event. The booth calls it.</div>
@@ -465,9 +490,12 @@ body.is-paused #paused-banner{display:block}
 			<p class="booth-kicker">The booth</p>
 			<span id="live-pill">STANDBY</span>
 		</div>
-		<div id="call-title">Waiting on a bite</div>
-		<p id="call-line">Drag anything off that plate and drop it on the mouth. I will call the whole trip — chew, mush, acid, heist, fermentation, poop.</p>
-		<p id="call-aside">Hit Pause any time the picture gets ahead of the words. Spacebar works too.</p>
+		<div id="call-title">Build a plate</div>
+		<p id="call-line">Click two, three, four foods. Drop any of them on the mouth. They enter as one meal — fat slows the sugar, fiber rides with the steak, beans ferment whether the rice is quiet or not.</p>
+		<p id="call-aside">The point is to see what combinations do, so the next plate is a better one. Pause is up top. Spacebar works.</p>
+		<div id="macros" class="macros"></div>
+		<div id="timing" class="timing"></div>
+		<div id="lessons"></div>
 		<p class="note" id="meal-label"></p>
 		<p id="bristol-read" class="note"></p>
 		<ol id="log"></ol>
@@ -476,7 +504,7 @@ body.is-paused #paused-banner{display:block}
 	</aside>
 </main>
 <footer>
-	<button class="eat" id="eat">Eat selected</button>
+	<button class="eat" id="eat" disabled>Build a plate</button>
 	<label class="chk">Speed <input id="speed" type="range" min="0.4" max="6" step="0.1" value="1"> <span id="speed-read">1.0×</span></label>
 	<p class="note">Model, not a diagnosis. Original illustration — not copied from WebMD / NatGeo. Unmute for the wet stuff.</p>
 </footer>
