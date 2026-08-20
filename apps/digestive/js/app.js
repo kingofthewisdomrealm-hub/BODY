@@ -19,8 +19,18 @@ const ui = {
 	chewFor: 4,
 	jawT: 0,
 	gurgleAcc: 0,
-	animT: 0
+	animT: 0,
+	grabbing: false,
+	seeking: false,
+	wasPlaying: false,
+	grabU: 0
 }
+
+const P_CHEW = 0.08
+const P_SWALLOW = 0.07
+const P_GUT = P_CHEW + P_SWALLOW
+const U_SWALLOW0 = 0.02
+const U_GUT0 = 0.12
 
 let meal = mix([...selected], { lactase: true })
 let lastTick = 0
@@ -69,18 +79,11 @@ function say(title, text) {
 function syncPause() {
 	const label = ui.paused ? 'Resume' : 'Pause'
 	const pause = $('#pause')
-	const fab = $('#pause-fab')
 	if (pause) {
 		pause.textContent = label
 		pause.disabled = ui.phase === 'idle'
 	}
-	if (fab) {
-		fab.textContent = ui.paused ? '▶' : '❚❚'
-		fab.title = label
-		fab.classList.toggle('is-paused', ui.paused)
-		fab.disabled = ui.phase === 'idle'
-	}
-	document.body.classList.toggle('is-paused', ui.paused && ui.phase !== 'idle')
+	document.body.classList.toggle('is-paused', ui.paused && ui.phase !== 'idle' && !ui.grabbing && !ui.seeking)
 }
 
 function setPaused(paused) {
@@ -91,7 +94,7 @@ function setPaused(paused) {
 }
 
 function togglePause() {
-	if (ui.phase === 'idle') return
+	if (ui.phase === 'idle' || ui.grabbing || ui.seeking) return
 	if (!ui.playing && !ui.paused && ui.phase === 'gut' && ui.hours >= 48) return
 	if (!ui.playing && !ui.paused) ui.playing = true
 	setPaused(!ui.paused)
@@ -161,6 +164,7 @@ function startEating(id) {
 	say('Bite', chewCall().line)
 	$('#eat').textContent = 'Eating…'
 	syncPause()
+	syncProgress()
 }
 
 function eat() {
@@ -169,10 +173,143 @@ function eat() {
 
 function svgPoint(evt) {
 	const svg = $('.body')
+	const ctm = svg.getScreenCTM()
 	const pt = svg.createSVGPoint()
 	pt.x = evt.clientX
 	pt.y = evt.clientY
-	return pt.matrixTransform(svg.getScreenCTM().inverse())
+	if (!ctm) return { x: 0, y: 0 }
+	return pt.matrixTransform(ctm.inverse())
+}
+
+function progressFromState() {
+	if (ui.phase === 'idle') return 0
+	if (ui.phase === 'chew') return (ui.hours / Math.max(0.2, ui.chewFor)) * P_CHEW
+	if (ui.phase === 'swallow') return P_CHEW + (ui.hours / 1.7) * P_SWALLOW
+	return P_GUT + (ui.hours / 48) * (1 - P_GUT)
+}
+
+function uFromProgress(p) {
+	if (p <= P_CHEW) return (p / P_CHEW) * U_SWALLOW0
+	if (p <= P_GUT) return U_SWALLOW0 + ((p - P_CHEW) / P_SWALLOW) * (U_GUT0 - U_SWALLOW0)
+	return U_GUT0 + ((p - P_GUT) / (1 - P_GUT)) * (0.995 - U_GUT0)
+}
+
+function progressFromU(u) {
+	if (u <= U_SWALLOW0) return (u / U_SWALLOW0) * P_CHEW
+	if (u <= U_GUT0) return P_CHEW + ((u - U_SWALLOW0) / (U_GUT0 - U_SWALLOW0)) * P_SWALLOW
+	return P_GUT + ((u - U_GUT0) / (0.995 - U_GUT0)) * (1 - P_GUT)
+}
+
+function leadU() {
+	return uFromProgress(progressFromState())
+}
+
+function midParticleU(hours) {
+	const saved = ui.phase
+	ui.phase = 'gut'
+	const u = particleU(stateAt(meal, hours, 'gut'), 20, 'starch')
+	ui.phase = saved
+	return Math.max(U_GUT0, u)
+}
+
+function visualLeadU() {
+	if (ui.phase === 'gut') return midParticleU(ui.hours)
+	return leadU()
+}
+
+function seekFromU(u) {
+	u = Math.max(0, Math.min(0.995, u))
+	if (u <= U_GUT0) {
+		seekProgress(progressFromU(u))
+		return
+	}
+	const saved = ui.phase
+	ui.phase = 'gut'
+	let lo = 0
+	let hi = 48
+	for (let i = 0; i < 20; i++) {
+		const mid = (lo + hi) / 2
+		const pu = particleU(stateAt(meal, mid, 'gut'), 20, 'starch')
+		if (pu < u) lo = mid
+		else hi = mid
+	}
+	ui.phase = saved
+	seekProgress(P_GUT + (((lo + hi) / 2) / 48) * (1 - P_GUT))
+}
+
+function applyProgress(p) {
+	p = Math.max(0, Math.min(1, p))
+	if (p <= P_CHEW) {
+		ui.phase = 'chew'
+		ui.hours = (p / P_CHEW) * ui.chewFor
+		ui.playing = true
+		return
+	}
+	if (p <= P_GUT) {
+		ui.phase = 'swallow'
+		ui.hours = ((p - P_CHEW) / P_SWALLOW) * 1.7
+		ui.playing = true
+		return
+	}
+	ui.phase = 'gut'
+	ui.hours = ((p - P_GUT) / (1 - P_GUT)) * 48
+	if (ui.hours >= 48) {
+		ui.hours = 48
+		ui.playing = false
+		const eat = $('#eat')
+		if (eat) eat.textContent = 'Eat again'
+		return
+	}
+	ui.playing = true
+	const eat = $('#eat')
+	if (eat) eat.textContent = 'Eating…'
+}
+
+function seekProgress(p) {
+	const prev = progressFromState()
+	applyProgress(p)
+	if (p < prev - 0.002) {
+		const stage = ui.phase === 'gut' ? stateAt(meal, ui.hours, 'gut').stage : ui.phase
+		if (stage !== 'rectum') ui.pooped = false
+		if (stage !== 'colon' && stage !== 'rectum') ui.farted = false
+		if (stage === 'chew' || stage === 'swallow' || stage === 'stomach' || stage === 'esophagus') ui.bilePlayed = false
+	}
+}
+
+function syncProgress() {
+	const el = $('#progress')
+	if (!el) return
+	el.disabled = ui.phase === 'idle'
+	if (ui.seeking || ui.grabbing) return
+	el.value = String(Math.round(progressFromState() * 1000))
+}
+
+function closestUNear(pt, hintU, window) {
+	const w = window ?? 0.14
+	const start = Math.max(0, hintU - w)
+	const end = Math.min(0.995, hintU + w)
+	const steps = 70
+	let best = hintU
+	let bestD = Infinity
+	for (let i = 0; i <= steps; i++) {
+		const u = start + (end - start) * (i / steps)
+		const q = pathEl.getPointAtLength(u * pathLen)
+		const dx = q.x - pt.x
+		const dy = q.y - pt.y
+		const d = dx * dx + dy * dy
+		if (d < bestD) {
+			bestD = d
+			best = u
+		}
+	}
+	return { u: best, d: Math.sqrt(bestD) }
+}
+
+function canGrab(pt) {
+	if (ui.phase === 'idle' || !pathEl) return false
+	const lead = pathEl.getPointAtLength(visualLeadU() * pathLen)
+	if (Math.hypot(pt.x - lead.x, pt.y - lead.y) < 44) return true
+	return closestUNear(pt, visualLeadU(), 0.05).d < 26
 }
 
 function inMouth(p) {
@@ -185,7 +322,7 @@ function tick(ts) {
 	requestAnimationFrame(tick)
 	const dt = Math.min(0.05, (ts - lastTick) / 1000)
 	lastTick = ts
-	if (!ui.playing || ui.paused) {
+	if (!ui.playing || ui.paused || ui.grabbing || ui.seeking) {
 		paint()
 		return
 	}
@@ -287,6 +424,7 @@ function paint() {
 	drawEpiglottis(ui.phase === 'swallow')
 	drawJaw(ui.phase === 'chew')
 	syncPause()
+	syncProgress()
 }
 
 function highlight(stage) {
@@ -332,9 +470,27 @@ function drawFood(state) {
 	else if (ui.phase === 'swallow') drawSwallow(g)
 	else drawGut(g, state)
 
+	drawGrabber(g)
 	ui.sparks.forEach((s) => {
 		g.appendChild(blob(s.x, s.y, 2.4, s.kind === 'fat' ? '#e6d48a' : '#d46a5a', Math.max(0.15, s.life)))
 	})
+}
+
+function drawGrabber(g) {
+	if (!pathEl || ui.phase === 'idle') return
+	const u = Math.min(0.995, visualLeadU())
+	const pt = pathEl.getPointAtLength(u * pathLen)
+	const r = ui.grabbing ? 16 : 13
+	g.appendChild(svgEl('circle', {
+		cx: pt.x, cy: pt.y, r: r + 8,
+		fill: '#d4a24c',
+		'fill-opacity': ui.grabbing ? '0.16' : '0.08',
+		stroke: '#d4a24c',
+		'stroke-width': ui.grabbing ? '2.4' : '1.6',
+		'stroke-dasharray': ui.grabbing ? '0' : '4 3',
+		opacity: '0.95'
+	}))
+	g.appendChild(blob(pt.x, pt.y, r, lerpColor(meal.color, '#d4c4a8', 0.35), 0.97))
 }
 
 function drawChew(g) {
@@ -560,7 +716,7 @@ function boothCopy(state) {
 		return {
 			title: 'Waiting on a bite',
 			line: 'Drag anything off that plate and drop it on the mouth. I will call the whole trip — chew, mush, acid, heist, fermentation, poop.',
-			aside: 'Hit Pause any time the picture gets ahead of the words. Spacebar works too.'
+			aside: 'Hit Pause up top any time the picture gets ahead of the words. Grab the gold ring on the food to drag it along the path. Spacebar works too.'
 		}
 	}
 	if (ui.phase === 'chew') {
@@ -695,7 +851,6 @@ function bind() {
 
 	$('#eat').addEventListener('click', eat)
 	$('#pause').addEventListener('click', togglePause)
-	$('#pause-fab').addEventListener('click', togglePause)
 	$('#speed').addEventListener('input', (e) => {
 		ui.speed = Number(e.target.value)
 		$('#speed-read').textContent = `${ui.speed.toFixed(1)}×`
@@ -721,15 +876,79 @@ function bind() {
 			paint()
 		})
 	})
-	$('#scrub').addEventListener('input', (e) => {
-		ui.phase = 'gut'
-		ui.playing = false
-		ui.paused = false
-		ui.hours = Number(e.target.value)
-		$('#eat').textContent = 'Eat again'
+	$('#progress').addEventListener('pointerdown', () => {
+		if (ui.phase === 'idle') return
+		ui.seeking = true
+		ui.wasPlaying = ui.playing && !ui.paused
+		ui.paused = true
+		syncPause()
+	})
+	$('#progress').addEventListener('input', (e) => {
+		if (ui.phase === 'idle') return
+		seekProgress(Number(e.target.value) / 1000)
+		paint()
+	})
+	const endSeek = () => {
+		if (!ui.seeking) return
+		ui.seeking = false
+		if (ui.wasPlaying) ui.paused = false
+		syncPause()
+		paint()
+	}
+	$('#progress').addEventListener('pointerup', endSeek)
+	$('#progress').addEventListener('pointercancel', endSeek)
+
+	svg.addEventListener('pointerdown', (e) => {
+		if (e.button !== 0) return
+		if (document.body.classList.contains('dragging')) return
+		if (ui.phase === 'idle') return
+		const pt = svgPoint(e)
+		if (!canGrab(pt)) return
+		e.preventDefault()
+		ui.grabbing = true
+		ui.wasPlaying = ui.playing && !ui.paused
+		ui.paused = true
+		ui.grabU = visualLeadU()
+		svg.setPointerCapture(e.pointerId)
+		document.body.classList.add('grabbing-food')
+		document.body.classList.remove('can-grab')
+		const near = closestUNear(pt, ui.grabU, 0.16)
+		ui.grabU = near.u
+		seekFromU(near.u)
 		syncPause()
 		paint()
 	})
+	svg.addEventListener('pointermove', (e) => {
+		if (ui.grabbing) {
+			const pt = svgPoint(e)
+			const near = closestUNear(pt, ui.grabU, 0.16)
+			ui.grabU = near.u
+			seekFromU(near.u)
+			paint()
+			return
+		}
+		if (ui.phase === 'idle' || document.body.classList.contains('dragging')) {
+			document.body.classList.remove('can-grab')
+			return
+		}
+		document.body.classList.toggle('can-grab', canGrab(svgPoint(e)))
+	})
+	const endGrab = (e) => {
+		if (!ui.grabbing) return
+		ui.grabbing = false
+		document.body.classList.remove('grabbing-food')
+		if (ui.wasPlaying) ui.paused = false
+		try { svg.releasePointerCapture(e.pointerId) } catch (err) {}
+		syncPause()
+		paint()
+	}
+	svg.addEventListener('pointerup', endGrab)
+	svg.addEventListener('pointercancel', endGrab)
+	svg.addEventListener('pointerleave', () => {
+		if (!ui.grabbing) document.body.classList.remove('can-grab')
+	})
+	window.addEventListener('pointerup', endSeek)
+
 	window.addEventListener('keydown', (e) => {
 		if (e.code !== 'Space') return
 		const tag = (e.target && e.target.tagName) || ''

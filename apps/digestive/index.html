@@ -28,7 +28,7 @@ main{display:grid;grid-template-columns:1fr 360px;min-height:0}
 @media (max-width:900px){main{grid-template-columns:1fr}}
 .viewport{position:relative;min-width:0;background:
 	radial-gradient(ellipse at 50% 18%,#1c334c 0%,#0a1018 42%,#07080c 74%)}
-svg.body{width:100%;height:100%;display:block}
+svg.body{width:100%;height:100%;display:block;touch-action:none}
 #tray{position:absolute;left:10px;top:10px;width:148px;max-height:calc(100% - 70px);overflow:auto;z-index:6;padding:0;border:0;background:transparent}
 #tray h2{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin:0 0 8px}
 .food{width:100%;display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);color:var(--ink);text-align:left;padding:7px 8px;margin-bottom:6px;border-radius:10px;cursor:grab;backdrop-filter:blur(10px)}
@@ -42,7 +42,7 @@ body.over-mouth #mouth-target{opacity:1;fill-opacity:.22}
 .food b{font-size:12px;display:block}
 .food small{display:block;color:var(--faint);font-size:10px}
 .swatch{width:10px;height:10px;border-radius:99px;background:var(--c);flex-shrink:0}
-#clock-wrap{position:absolute;left:170px;right:88px;bottom:10px;display:flex;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);pointer-events:none;text-shadow:0 1px 8px #000}
+#clock-wrap{position:absolute;left:170px;right:16px;bottom:10px;display:flex;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);pointer-events:none;text-shadow:0 1px 8px #000}
 aside.lab{border-left:1px solid var(--line);overflow:auto;padding:16px 18px 40px;background:#0c0e14}
 .booth-top{display:flex;align-items:center;gap:10px;margin-bottom:12px}
 .booth-kicker{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);margin:0}
@@ -63,10 +63,9 @@ aside.lab{border-left:1px solid var(--line);overflow:auto;padding:16px 18px 40px
 footer{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:8px 14px;border-top:1px solid var(--line);background:#0b0c10}
 button.eat{background:var(--gold);border:0;color:#17140c;font-weight:700;padding:9px 16px;border-radius:999px;cursor:pointer}
 button.ghost{background:transparent;border:1px solid var(--line);color:var(--ink);padding:7px 12px;border-radius:999px;cursor:pointer}
-button.ghost:disabled, .pause-fab:disabled{opacity:.35;cursor:default}
-#pause{min-width:88px;border-color:var(--gold);color:var(--gold)}
-body.is-paused #pause{background:var(--gold);color:#17140c;font-weight:700}
-#scrub{flex:1;min-width:120px}
+button.ghost:disabled{opacity:.35;cursor:default}
+#pause{min-width:92px;border-color:var(--gold);color:var(--gold);font-weight:600}
+body.is-paused #pause{background:var(--gold);color:#17140c}
 .note{font-size:11px;color:var(--faint)}
 [data-organ]{transition:filter .25s, opacity .25s}
 [data-organ].hot{filter:url(#hotglow)}
@@ -75,17 +74,29 @@ body[data-view="xray"] .organ{filter:grayscale(1) brightness(.65) contrast(1.15)
 body[data-view="xray"] .bone{opacity:.9}
 body[data-view="xray"] .vessel{opacity:.05}
 body[data-view="barium"] .organ{opacity:.55}
-.hint{position:absolute;left:170px;top:12px;font-size:11px;color:var(--faint);pointer-events:none}
+.hint{position:absolute;left:170px;top:58px;font-size:11px;color:var(--faint);pointer-events:none}
 .hint-x{display:none}
 body[data-view="xray"] .hint-x{display:block}
 #ingredients{display:none}
-.pause-fab{
-	position:absolute;right:16px;bottom:44px;z-index:8;
-	width:64px;height:64px;border-radius:99px;border:0;
-	background:var(--gold);color:#17140c;font-size:18px;font-weight:700;
-	cursor:pointer;box-shadow:0 10px 28px rgba(0,0,0,.45);
+.journey{
+	position:absolute;left:170px;right:16px;top:8px;z-index:7;
+	pointer-events:auto;
 }
-.pause-fab.is-paused{background:var(--rust);color:#fff}
+.journey input{
+	width:100%;margin:0;accent-color:var(--gold);height:18px;cursor:pointer;
+}
+.journey input:disabled{opacity:.35;cursor:default}
+.journey-ticks{position:relative;height:16px;margin-top:1px}
+.journey-ticks span{
+	position:absolute;top:0;transform:translateX(-50%);
+	font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);
+}
+.journey-ticks span:first-child{transform:none}
+.journey-ticks span:last-child{transform:translateX(-100%)}
+body.can-grab svg.body{cursor:grab}
+body.grabbing-food svg.body{cursor:grabbing}
+body.grabbing-food #journey-guide, body:not([data-phase="idle"]) #journey-guide{opacity:.3}
+body.grabbing-food #journey-guide{opacity:.6;stroke-width:3.5}
 #paused-banner{
 	display:none;position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);
 	z-index:7;pointer-events:none;text-align:center;
@@ -100,6 +111,7 @@ body.is-paused #paused-banner{display:block}
 <body data-view="anatomy" data-phase="idle">
 <header>
 	<div class="brand">BODY <em>Eat</em></div>
+	<button class="ghost" id="pause" disabled>Pause</button>
 	<div class="spacer"></div>
 	<div class="toggle">
 		<button data-view="anatomy" class="on">Anatomy</button>
@@ -114,8 +126,18 @@ body.is-paused #paused-banner{display:block}
 <main>
 	<section class="viewport">
 		<section id="tray"><h2>Plate</h2></section>
-		<p class="hint">Drag a food onto the mouth. Pause to read the booth. Spacebar works.</p>
-		<p class="hint hint-x" style="top:32px">Plain film: gas and bone. The meal is invisible.</p>
+		<div class="journey">
+			<input id="progress" type="range" min="0" max="1000" step="1" value="0" disabled aria-label="Food journey">
+			<div class="journey-ticks">
+				<span style="left:0">Mouth</span>
+				<span style="left:15%">Stomach</span>
+				<span style="left:32%">Bowel</span>
+				<span style="left:62%">Colon</span>
+				<span style="left:100%">Out</span>
+			</div>
+		</div>
+		<p class="hint">Drag a food onto the mouth. Grab it on the path to scrub. Pause is up top.</p>
+		<p class="hint hint-x" style="top:78px">Plain film: gas and bone. The meal is invisible.</p>
 		<svg class="body" viewBox="0 0 640 1080" role="img" aria-label="Digestive organs in a living torso">
 			<defs>
 				<linearGradient id="skin" x1="0" y1="0" x2="0.15" y2="1">
@@ -375,6 +397,33 @@ body.is-paused #paused-banner{display:block}
 			<path fill="none" stroke="#6a8a28" stroke-width="2.2" d="M248 372 C238 350, 226 338, 214 348"/>
 			<ellipse cx="246" cy="378" rx="6" ry="9" fill="#e8f4a0" opacity=".35"/>
 
+			<path id="journey-guide" fill="none" stroke="#d4a24c" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" opacity="0" d="M320 98
+				C320 112, 320 124, 320 128
+				C318 190, 322 240, 328 286
+				C332 308, 344 322, 358 330
+				C400 320, 460 340, 470 380
+				C475 410, 430 455, 380 460
+				C340 465, 300 450, 292 476
+				C300 508, 340 518, 360 500
+				C320 468, 270 458, 248 490
+				C226 522, 270 538, 312 522
+				C354 506, 400 528, 388 562
+				C376 596, 318 590, 286 612
+				C254 634, 292 658, 336 646
+				C380 634, 424 658, 408 692
+				C392 726, 330 718, 300 744
+				C270 770, 318 792, 320 820
+				C250 840, 200 860, 196 860
+				C168 830, 170 790, 176 750
+				C182 700, 174 650, 180 600
+				C186 555, 178 510, 196 478
+				C214 448, 250 438, 300 436
+				H430
+				C478 436, 500 458, 504 500
+				V760
+				C504 810, 478 848, 430 868
+				C390 884, 360 900, 340 930
+				V990"/>
 			<path id="gut-path" fill="none" stroke="none" d="M320 98
 				C320 112, 320 124, 320 128
 				C318 190, 322 240, 328 286
@@ -406,7 +455,6 @@ body.is-paused #paused-banner{display:block}
 			<g id="bolus-cloud"></g>
 		</svg>
 		<div id="paused-banner">Paused<small>Read the booth · space to resume</small></div>
-		<button class="pause-fab" id="pause-fab" type="button" title="Pause" disabled>❚❚</button>
 		<div id="clock-wrap">
 			<div id="clock">The model is the event. The booth calls it.</div>
 			<div id="pH">pH —</div>
@@ -429,9 +477,7 @@ body.is-paused #paused-banner{display:block}
 </main>
 <footer>
 	<button class="eat" id="eat">Eat selected</button>
-	<button class="ghost" id="pause" disabled>Pause</button>
 	<label class="chk">Speed <input id="speed" type="range" min="0.4" max="6" step="0.1" value="1"> <span id="speed-read">1.0×</span></label>
-	<input id="scrub" type="range" min="0" max="48" step="0.1" value="0" aria-label="Hours after swallow">
 	<p class="note">Model, not a diagnosis. Original illustration — not copied from WebMD / NatGeo. Unmute for the wet stuff.</p>
 </footer>
 <script src="./js/engine.js"></script>
