@@ -4,212 +4,278 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>BODY — Eat</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <style>
 :root{
-	--bg:#0b0c10; --bg2:#111319; --panel:#15171f; --line:#252836;
+	--bg:#07080c; --panel:rgba(12,14,20,.88); --line:#252836;
 	--ink:#e8e4dc; --dim:#9a9789; --faint:#6d6b62;
-	--gold:#d4a24c; --rust:#c46a4a; --sage:#7fa07a; --sky:#6f92b8;
+	--gold:#d4a24c; --sky:#6f92b8; --sage:#7fa07a; --rust:#c46a4a;
 	--mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
 	--serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
 	--sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,system-ui,sans-serif;
 }
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:var(--sans)}
-body{display:flex;flex-direction:column;min-height:100%}
-header{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:12px 20px;border-bottom:1px solid var(--line);background:rgba(11,12,16,.92);backdrop-filter:blur(12px);position:sticky;top:0;z-index:20}
+body{display:grid;grid-template-rows:auto 1fr auto;height:100vh}
+header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:8px 16px;border-bottom:1px solid var(--line);background:#0b0c10;z-index:20}
 .brand{font-family:var(--serif);font-size:18px}
 .brand em{color:var(--gold);font-style:italic}
-.brand small{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--faint);margin-top:2px}
 .spacer{flex:1}
-.toggle{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px}
-.toggle button{background:none;border:0;color:var(--dim);font:inherit;font-size:12px;padding:6px 12px;border-radius:999px;cursor:pointer}
+.toggle{display:flex;background:#15171f;border:1px solid var(--line);border-radius:999px;padding:3px}
+.toggle button{background:none;border:0;color:var(--dim);font:inherit;font-size:12px;padding:5px 11px;border-radius:999px;cursor:pointer}
 .toggle button.on{background:var(--gold);color:#17140c;font-weight:600}
 label.chk{font-size:12px;color:var(--dim);display:flex;gap:6px;align-items:center}
-main{flex:1;display:grid;grid-template-columns:220px minmax(280px,1fr) 380px;min-height:0}
-@media (max-width:1100px){main{grid-template-columns:1fr;}}
-#tray{border-right:1px solid var(--line);padding:14px;overflow:auto}
-#tray h2, aside h2{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);margin:0 0 10px;font-weight:500}
-.food{width:100%;display:grid;grid-template-columns:14px 1fr;grid-template-rows:auto auto;column-gap:10px;background:var(--bg2);border:1px solid var(--line);color:var(--ink);text-align:left;padding:8px 10px;margin-bottom:8px;border-radius:8px;cursor:pointer}
+main{display:grid;grid-template-columns:1fr 320px;min-height:0}
+@media (max-width:900px){main{grid-template-columns:1fr}}
+.viewport{position:relative;min-width:0;background:radial-gradient(ellipse at 50% 30%,#152033 0%,#07080c 70%)}
+svg.body{width:100%;height:100%;display:block}
+#tray{position:absolute;left:10px;top:10px;width:148px;max-height:calc(100% - 70px);overflow:auto;z-index:6;padding:0;border:0;background:transparent}
+#tray h2{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin:0 0 8px}
+.food{width:100%;display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);color:var(--ink);text-align:left;padding:7px 8px;margin-bottom:6px;border-radius:10px;cursor:pointer;backdrop-filter:blur(10px)}
 .food.on{border-color:var(--gold)}
-.food b{font-size:13px}
-.food small{grid-column:2;color:var(--faint);font-size:11px}
-.swatch{width:10px;height:10px;border-radius:99px;background:var(--c);margin-top:4px}
-.viewport{position:relative;background:radial-gradient(ellipse at 50% 20%,#141822,var(--bg) 70%);overflow:hidden}
-svg.body{width:100%;height:100%;max-height:calc(100vh - 150px)}
-#clock-wrap{position:absolute;left:16px;right:16px;bottom:12px;display:flex;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--gold);pointer-events:none}
-aside.lab{border-left:1px solid var(--line);overflow:auto;padding:14px 16px 80px;background:var(--bg)}
-.who{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
-.who button{border:1px solid var(--line);background:var(--panel);color:var(--dim);font:inherit;font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:5px 8px;border-radius:99px}
+.food b{font-size:12px;display:block}
+.food small{display:block;color:var(--faint);font-size:10px}
+.swatch{width:10px;height:10px;border-radius:99px;background:var(--c);flex-shrink:0}
+#clock-wrap{position:absolute;left:170px;right:16px;bottom:10px;display:flex;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);pointer-events:none;text-shadow:0 1px 8px #000}
+aside.lab{border-left:1px solid var(--line);overflow:auto;padding:16px 18px 40px;background:#0c0e14}
+aside.lab h2{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);margin:18px 0 8px;font-weight:500}
+aside.lab h2:first-child{margin-top:0}
+#seeing-title{font-family:var(--serif);font-size:26px;font-weight:400;margin:0 0 8px;letter-spacing:-.02em;line-height:1.15}
+#seeing-copy{color:var(--dim);font-size:14.5px;line-height:1.5;margin:0 0 14px}
+.who{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+.who button{border:1px solid var(--line);background:#15171f;color:var(--dim);font:inherit;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;padding:4px 7px;border-radius:99px}
 .who button.on{color:#17140c;background:var(--gold);border-color:var(--gold)}
-#macros{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 12px}
-#macros span{font-size:11px;color:var(--dim);background:var(--panel);padding:4px 8px;border-radius:6px;border:1px solid var(--line)}
-#macros b{color:var(--ink);display:block;font-size:13px}
-.lab ul{margin:0 0 14px;padding-left:16px;color:var(--dim);font-size:13.5px;line-height:1.45}
-.lab li{margin-bottom:6px}
-.sys{border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:8px;background:var(--panel)}
-.sys i{font-style:normal;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+#macros{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}
+#macros span{font-size:10px;color:var(--dim);background:#15171f;padding:4px 7px;border-radius:6px;border:1px solid var(--line)}
+#macros b{color:var(--ink);display:block;font-size:12px}
+.lab ul{margin:0 0 10px;padding-left:16px;color:var(--dim);font-size:13px;line-height:1.4}
+.lab li{margin-bottom:5px}
+.sys{border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:7px;background:#15171f}
+.sys i{font-style:normal;font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
 .sys span{float:right;font-size:10px;color:var(--faint)}
-.sys p{margin:6px 0 0;font-size:13px;color:var(--dim)}
-.proof{border-left:3px solid var(--sage);background:#10151c;padding:10px 12px;margin-bottom:10px;border-radius:0 8px 8px 0}
+.sys p{margin:5px 0 0;font-size:12.5px;color:var(--dim)}
+.proof{border-left:3px solid var(--sage);background:#10151c;padding:9px 11px;margin-bottom:9px}
 .proof.range{border-left-color:var(--sky)}
 .proof.contested{border-left-color:var(--rust)}
-.proof h3{margin:0 0 6px;font-size:14px;font-weight:600}
-.proof .pg{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--sage);margin-bottom:4px}
-.proof .exp{font-size:12.5px;color:var(--dim);margin:0 0 6px}
-.proof a{color:var(--gold);font-size:12px}
-footer{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:10px 16px;border-top:1px solid var(--line)}
-button.eat{background:var(--gold);border:0;color:#17140c;font-weight:700;padding:10px 18px;border-radius:999px;cursor:pointer;font-size:15px}
-button.ghost{background:transparent;border:1px solid var(--line);color:var(--ink);padding:8px 12px;border-radius:999px;cursor:pointer}
-#scrub{flex:1;min-width:160px}
-.note{font-size:11px;color:var(--faint);max-width:70ch}
-[data-organ]{transition:fill .3s,stroke .3s,filter .3s}
-[data-organ].hot{filter:url(#glow);stroke:#f0d9a0;stroke-width:1.4}
-body[data-view="xray"] svg.body{background:#050505}
-body[data-view="xray"] .flesh{opacity:.15}
-body[data-view="xray"] .soft{fill:#2a2a2a !important;stroke:#666 !important}
-body[data-view="xray"] .bone{fill:#d9d9d9;opacity:.9}
-body[data-view="barium"] .soft{stroke:#cfe7ff;stroke-width:1.2}
-body[data-view="exchange"] .import-glow{opacity:.9}
-.hint{position:absolute;top:12px;left:16px;right:16px;font-size:12px;color:var(--dim);pointer-events:none}
+.proof h3{margin:0 0 5px;font-size:13.5px;font-weight:600}
+.proof .pg{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--sage);margin-bottom:4px}
+.proof .exp{font-size:12px;color:var(--dim);margin:0 0 5px}
+.proof a{color:var(--gold);font-size:11.5px}
+footer{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:8px 14px;border-top:1px solid var(--line);background:#0b0c10}
+button.eat{background:var(--gold);border:0;color:#17140c;font-weight:700;padding:9px 16px;border-radius:999px;cursor:pointer}
+button.ghost{background:transparent;border:1px solid var(--line);color:var(--ink);padding:7px 12px;border-radius:999px;cursor:pointer}
+#scrub{flex:1;min-width:120px}
+.note{font-size:11px;color:var(--faint)}
+[data-organ]{transition:filter .25s, opacity .25s}
+[data-organ].hot{filter:url(#hotglow)}
+body[data-view="xray"] .flesh{opacity:.2}
+body[data-view="xray"] .organ{filter:grayscale(1) brightness(.7)}
+body[data-view="xray"] .bone{opacity:.85}
+body[data-view="barium"] .organ{opacity:.55}
+.hint{position:absolute;left:170px;top:12px;font-size:11px;color:var(--faint);pointer-events:none}
+.hint-x{display:none}
 body[data-view="xray"] .hint-x{display:block}
-.hint-x{display:none;color:#9aa}
-.sil{fill:#1a1d27;stroke:#2c3142;stroke-width:.6}
-.liver{fill:#6b2e28}
-.stomach{fill:#c46a6a}
-.gb{fill:#3d8f6e}
-.pancreas{fill:#d4c4a8}
-.bowel{fill:#b5836a}
-.colon{fill:#c4a574}
-.eso{fill:none;stroke:#c98580;stroke-width:7;stroke-linecap:round}
-.mouth{fill:#8a3d48}
-.trachea{fill:none;stroke:#6f92b8;stroke-width:3;stroke-dasharray:4 3;opacity:.7}
+#ingredients{display:none}
 </style>
 </head>
 <body data-view="anatomy" data-phase="idle">
 <header>
-	<div class="brand">BODY <em>Eat</em><small>Digestive MVP · six systems eat · the gut receives</small></div>
+	<div class="brand">BODY <em>Eat</em></div>
 	<div class="spacer"></div>
-	<div class="toggle" role="tablist">
+	<div class="toggle">
 		<button data-view="anatomy" class="on">Anatomy</button>
 		<button data-view="xray">Plain film</button>
 		<button data-view="barium">Barium</button>
 		<button data-view="exchange">Exchange</button>
 	</div>
-	<label class="chk"><input type="checkbox" id="lactase" checked> Lactase on</label>
+	<label class="chk"><input type="checkbox" id="lactase" checked> Lactase</label>
 	<label class="chk"><input type="checkbox" id="mute" checked> Mute</label>
-	<label class="chk"><input type="checkbox" id="everyday"> If I ate this every day</label>
+	<label class="chk"><input type="checkbox" id="everyday"> Every day</label>
 </header>
 <main>
-	<section id="tray">
-		<h2>Plate · up to 3</h2>
-	</section>
 	<section class="viewport">
-		<p class="hint">Anterior view. Patient’s left is your right: stomach under the left ribs, liver on the right.</p>
-		<p class="hint hint-x">Plain film: bone, gas, mottled stool. The meal is invisible unless you drank barium.</p>
-		<svg class="body" viewBox="0 0 420 760" role="img" aria-label="Anatomically placed digestive tract">
+		<section id="tray"><h2>Plate</h2></section>
+		<p class="hint">Anterior. Your right = patient’s left (stomach). Your left = liver.</p>
+		<p class="hint hint-x" style="top:32px">Plain film: gas and bone. The meal is invisible.</p>
+		<svg class="body" viewBox="0 0 640 1080" role="img" aria-label="Digestive organs in a living torso">
 			<defs>
-				<filter id="glow"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+				<linearGradient id="skin" x1="0" y1="0" x2="1" y2="1">
+					<stop offset="0%" stop-color="#3d6a8c" stop-opacity=".18"/>
+					<stop offset="100%" stop-color="#0b1c2c" stop-opacity=".5"/>
+				</linearGradient>
+				<linearGradient id="gLiver" x1="0" y1="0" x2="1" y2="1">
+					<stop offset="0%" stop-color="#a34a3d"/>
+					<stop offset="45%" stop-color="#7a2f28"/>
+					<stop offset="100%" stop-color="#4e1c18"/>
+				</linearGradient>
+				<radialGradient id="gStomach" cx="38%" cy="30%" r="70%">
+					<stop offset="0%" stop-color="#f7d4cc"/>
+					<stop offset="55%" stop-color="#e8a39a"/>
+					<stop offset="100%" stop-color="#c46b6b"/>
+				</radialGradient>
+				<linearGradient id="gPanc" x1="0" y1="0" x2="1" y2="1">
+					<stop offset="0%" stop-color="#f0e0b0"/>
+					<stop offset="100%" stop-color="#c9ae72"/>
+				</linearGradient>
+				<linearGradient id="gGB" x1="0" y1="0" x2="0" y2="1">
+					<stop offset="0%" stop-color="#b7d45c"/>
+					<stop offset="100%" stop-color="#5a8a28"/>
+				</linearGradient>
+				<linearGradient id="gSI" x1="0" y1="0" x2="1" y2="1">
+					<stop offset="0%" stop-color="#f0b2a4"/>
+					<stop offset="100%" stop-color="#d47a6c"/>
+				</linearGradient>
+				<linearGradient id="gColon" x1="0" y1="0" x2="0" y2="1">
+					<stop offset="0%" stop-color="#f0c8a0"/>
+					<stop offset="100%" stop-color="#d49a6a"/>
+				</linearGradient>
+				<linearGradient id="gEso" x1="0" y1="0" x2="1" y2="0">
+					<stop offset="0%" stop-color="#e8a090"/>
+					<stop offset="100%" stop-color="#c87878"/>
+				</linearGradient>
+				<filter id="soft"><feGaussianBlur stdDeviation="1.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+				<filter id="hotglow">
+					<feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#f0d9a0" flood-opacity=".9"/>
+				</filter>
+				<filter id="depth"><feDropShadow dx="1" dy="3" stdDeviation="2.4" flood-color="#000" flood-opacity=".35"/></filter>
 			</defs>
-			<!-- silhouette, patient facing us -->
-			<path class="sil flesh" d="M210 22c-28 0-50 22-50 52 0 12 4 22 10 30h-8c-6 8-10 18-10 30v18c-42 14-70 52-78 98-4 22-4 48 2 70 8 28 22 48 22 78v70c0 30-6 50-6 78v92c0 18 10 28 24 28h20v-90c0-20 6-30 18-30h56c12 0 18 10 18 30v90h20c14 0 24-10 24-28v-92c0-28-6-48-6-78v-70c0-30 14-50 22-78 6-22 6-48 2-70-8-46-36-84-78-98v-18c0-12-4-22-10-30h-8c6-8 10-18 10-30 0-30-22-52-50-52z"/>
-			<!-- bone suggestion -->
-			<rect class="bone" x="200" y="168" width="20" height="92" rx="4" opacity=".12"/>
-			<rect class="bone" x="196" y="430" width="28" height="18" rx="3" opacity=".12"/>
 
-			<!-- trachea (respiratory) -->
-			<path class="trachea" d="M210 118 v52" data-organ="epiglottis"/>
+			<!-- translucent body -->
+			<path class="flesh" fill="url(#skin)" stroke="#4a7394" stroke-width="1.2" d="M320 18c-34 0-62 28-62 64 0 14 5 28 14 38h-10c-7 10-12 22-12 36v22c-58 18-96 70-108 128-8 38-6 78 4 112 12 42 28 70 28 112v86c0 36-8 62-8 98v110c0 22 14 34 32 34h28v-108c0-24 8-36 24-36h70c16 0 24 12 24 36v108h28c18 0 32-12 32-34v-110c0-36-8-62-8-98v-86c0-42 16-70 28-112 10-34 12-74 4-112-12-58-50-110-108-128v-22c0-14-5-26-12-36h-10c9-10 14-24 14-38 0-36-28-64-62-64z"/>
+			<!-- faint ribs / spine -->
+			<g class="bone" opacity=".22" fill="none" stroke="#d9e6f0" stroke-width="3">
+				<path d="M320 200 v210"/>
+				<path d="M250 230 q70 -18 140 0"/>
+				<path d="M242 258 q78 -16 156 0"/>
+				<path d="M238 286 q82 -14 164 0"/>
+				<path d="M240 314 q80 -12 160 0"/>
+				<ellipse cx="320" cy="500" rx="22" ry="12"/>
+			</g>
 
-			<!-- parotids -->
-			<ellipse class="soft" data-organ="parotid" cx="162" cy="78" rx="10" ry="14" fill="#d8c8b8"/>
-			<ellipse class="soft" data-organ="parotid" cx="258" cy="78" rx="10" ry="14" fill="#d8c8b8"/>
+			<ellipse data-organ="parotid" class="organ" cx="252" cy="78" rx="14" ry="18" fill="#e8d5c4" filter="url(#depth)"/>
+			<ellipse data-organ="parotid" class="organ" cx="388" cy="78" rx="14" ry="18" fill="#e8d5c4" filter="url(#depth)"/>
 
-			<!-- mouth + teeth + jaw -->
 			<g id="jaw">
-				<ellipse class="mouth soft" data-organ="mouth" cx="210" cy="96" rx="22" ry="10"/>
+				<ellipse data-organ="mouth" class="organ" cx="320" cy="98" rx="28" ry="12" fill="#8a3d48"/>
 				<g data-organ="teeth">
-					<rect class="bone" x="196" y="90" width="6" height="7" rx="1" fill="#efe6d6"/>
-					<rect class="bone" x="204" y="90" width="6" height="7" rx="1" fill="#efe6d6"/>
-					<rect class="bone" x="212" y="90" width="6" height="7" rx="1" fill="#efe6d6"/>
-					<rect class="bone" x="220" y="90" width="6" height="7" rx="1" fill="#efe6d6"/>
+					<rect x="302" y="91" width="7" height="8" rx="1" fill="#f3ead8"/>
+					<rect x="311" y="91" width="7" height="8" rx="1" fill="#f3ead8"/>
+					<rect x="320" y="91" width="7" height="8" rx="1" fill="#f3ead8"/>
+					<rect x="329" y="91" width="7" height="8" rx="1" fill="#f3ead8"/>
 				</g>
 			</g>
-			<!-- epiglottis -->
 			<g id="epiglottis-flap" data-organ="epiglottis">
-				<path d="M204 118 q6 -14 12 0" fill="#c46a6a" stroke="#8a3d48"/>
+				<path d="M312 124 q8 -16 16 0" fill="#d47a7a"/>
 			</g>
+			<path fill="none" stroke="#6f92b8" stroke-width="4" stroke-dasharray="5 4" d="M320 128 v70" opacity=".65"/>
 
-			<!-- esophagus to cardia (viewer's right / patient's left) -->
-			<path class="eso soft" data-organ="esophagus" d="M210 128 C208 170, 214 210, 218 248 C220 262, 226 270, 238 276"/>
-			<circle data-organ="les" class="soft" cx="238" cy="276" r="5" fill="#8a3d48"/>
+			<!-- esophagus -->
+			<path data-organ="esophagus" class="organ" fill="none" stroke="url(#gEso)" stroke-width="16" stroke-linecap="round" filter="url(#depth)" d="M320 128 C318 190, 322 240, 328 286 C332 308, 344 322, 358 330"/>
+			<circle data-organ="les" class="organ" cx="360" cy="332" r="7" fill="#c46b6b"/>
 
-			<!-- liver: patient's right = viewer's left -->
-			<path class="liver soft" data-organ="liver" d="M86 258 C90 236, 130 228, 168 236 C198 244, 210 268, 200 300 C186 338, 140 348, 108 330 C84 314, 80 284, 86 258Z"/>
-			<ellipse class="gb soft" data-organ="gallbladder" cx="158" cy="318" rx="8" ry="14"/>
+			<!-- pancreas behind stomach / in C-loop -->
+			<path data-organ="pancreas" class="organ" filter="url(#depth)" fill="url(#gPanc)" d="M300 400 C330 386, 390 384, 455 402 C468 408, 462 422, 400 420 C350 418, 312 428, 292 442 C286 430, 290 408, 300 400Z"/>
 
-			<!-- stomach J, LUQ of patient = viewer's right -->
-			<path class="stomach soft" data-organ="stomach" d="M238 276 C268 262, 302 268, 308 292 C314 318, 300 346, 268 354 C248 358, 232 348, 224 336 C218 326, 226 318, 240 322 C252 326, 268 318, 270 302 C272 286, 252 280, 238 276Z"/>
+			<!-- small intestine packed coils (behind colon frame) -->
+			<path data-organ="smallbowel" class="organ" fill="none" stroke="url(#gSI)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" filter="url(#depth)" d="M360 455
+				C320 468, 270 458, 248 490
+				C226 522, 270 538, 312 522
+				C354 506, 400 528, 388 562
+				C376 596, 318 590, 286 612
+				C254 634, 292 658, 336 646
+				C380 634, 424 658, 408 692
+				C392 726, 330 718, 300 744
+				C270 770, 318 792, 358 778
+				C398 764, 430 790, 410 818
+				C390 846, 340 838, 320 860"/>
+			<path data-organ="duodenum" class="organ" fill="none" stroke="#e09484" stroke-width="16" stroke-linecap="round" d="M348 418 C310 426, 286 446, 292 476 C300 508, 340 518, 368 500"/>
 
-			<!-- pancreas behind, head in C-loop -->
-			<path class="pancreas soft" data-organ="pancreas" d="M198 336 C210 328, 250 326, 286 338 C292 342, 286 350, 248 348 C220 346, 200 350, 190 358 C186 352, 190 342, 198 336Z"/>
+			<!-- colon with haustra: thick peach frame -->
+			<g data-organ="colon" class="organ" filter="url(#depth)">
+				<path fill="none" stroke="url(#gColon)" stroke-width="34" stroke-linecap="round" stroke-linejoin="round" d="M196 860
+					C168 830, 170 790, 176 750
+					C182 700, 174 650, 180 600
+					C186 555, 178 510, 196 478
+					C214 448, 250 438, 300 436
+					H430
+					C478 436, 500 458, 504 500
+					V760
+					C504 810, 478 848, 430 868
+					C390 884, 360 900, 340 930"/>
+				<path fill="none" stroke="#c48a5a" stroke-width="34" stroke-dasharray="7 26" stroke-linecap="butt" opacity=".32" d="M196 860
+					C168 830, 170 790, 176 750
+					C182 700, 174 650, 180 600
+					C186 555, 178 510, 196 478
+					C214 448, 250 438, 300 436
+					H430
+					C478 436, 500 458, 504 500
+					V760
+					C504 810, 478 848, 430 868
+					C390 884, 360 900, 340 930"/>
+				<circle cx="198" cy="868" r="22" fill="#e0b080"/>
+				<path d="M214 878 q18 16 8 28" fill="none" stroke="#d4a070" stroke-width="7" stroke-linecap="round"/>
+			</g>
+			<path data-organ="rectum" class="organ" fill="none" stroke="#c49268" stroke-width="26" stroke-linecap="round" d="M340 930 V990"/>
 
-			<!-- duodenum C toward viewer's left -->
-			<path class="bowel soft" data-organ="duodenum" fill="none" stroke="#b5836a" stroke-width="10" stroke-linecap="round" d="M224 336 C200 340, 186 352, 190 370 C196 390, 222 396, 236 384"/>
+			<!-- stomach J, patient's left = viewer's right -->
+			<path data-organ="stomach" class="organ" filter="url(#depth)" fill="url(#gStomach)" d="M358 330
+				C410 312, 478 322, 492 368
+				C504 412, 478 458, 428 472
+				C392 482, 362 468, 348 446
+				C338 430, 348 416, 372 420
+				C396 424, 430 408, 432 384
+				C434 358, 400 340, 358 330Z"/>
+			<ellipse cx="455" cy="350" rx="18" ry="12" fill="#f7ddd8" opacity=".45"/>
 
-			<!-- small bowel coils -->
-			<path class="bowel soft" data-organ="smallbowel" fill="none" stroke="#a07058" stroke-width="7" d="M236 384 C210 400, 168 392, 158 418 C148 444, 190 454, 214 442 C238 430, 268 448, 250 472 C232 496, 186 490, 170 510 C154 530, 188 548, 214 536 C240 524, 266 546, 248 560"/>
+			<!-- liver on top, patient's right = viewer's left -->
+			<path data-organ="liver" class="organ" filter="url(#depth)" fill="url(#gLiver)" d="M118 300
+				C122 252, 170 228, 230 232
+				C290 236, 338 262, 348 308
+				C356 348, 338 392, 300 418
+				C250 452, 180 458, 140 428
+				C108 404, 102 350, 118 300Z"/>
+			<path d="M230 250 C250 290, 255 340, 240 390" fill="none" stroke="#5c221c" stroke-width="2" opacity=".35"/>
+			<path data-organ="gallbladder" class="organ" filter="url(#depth)" fill="url(#gGB)" d="M236 368 C248 360, 258 368, 256 388 C254 410, 242 424, 228 418 C216 412, 222 376, 236 368Z"/>
 
-			<!-- colon frame with haustra: cecum RLQ = viewer's left -->
-			<path class="colon soft" data-organ="colon" fill="none" stroke="#c4a574" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" d="M128 548 C118 530, 118 500, 120 470 S118 410, 122 380 C124 360, 128 348, 148 344 H270 C292 344, 304 352, 306 372 V500 C306 530, 290 552, 250 568 C230 578, 220 590, 214 610"/>
-			<circle class="colon soft" data-organ="colon" cx="132" cy="556" r="11" fill="#c4a574"/>
-			<line x1="140" y1="560" x2="152" y2="572" stroke="#a8885a" stroke-width="3"/>
-
-			<!-- rectum -->
-			<path class="colon soft" data-organ="rectum" fill="none" stroke="#a8885a" stroke-width="12" d="M214 610 V648"/>
-
-			<!-- invisible transit path -->
-			<path id="gut-path" fill="none" stroke="none" d="M210 96
-				C210 110, 210 118, 210 128
-				C208 170, 214 210, 218 248
-				C220 262, 226 270, 238 276
-				C260 272, 290 280, 292 300
-				C294 322, 270 342, 240 338
-				C224 336, 200 340, 190 360
-				C186 378, 210 392, 236 384
-				C210 400, 168 392, 158 418
-				C148 444, 190 454, 214 442
-				C238 430, 268 448, 250 472
-				C232 496, 186 490, 170 510
-				C154 530, 188 548, 214 536
-				C200 548, 160 556, 132 548
-				C118 530, 118 500, 120 470
-				S118 410, 122 380
-				C124 360, 128 348, 148 344
-				H270
-				C292 344, 304 352, 306 372
-				V500
-				C306 530, 290 552, 250 568
-				C230 578, 220 590, 214 610
-				V648"/>
+			<!-- transit path -->
+			<path id="gut-path" fill="none" stroke="none" d="M320 98
+				C320 112, 320 124, 320 128
+				C318 190, 322 240, 328 286
+				C332 308, 344 322, 358 330
+				C400 320, 460 340, 470 380
+				C475 410, 430 455, 380 460
+				C340 465, 300 450, 292 476
+				C300 508, 340 518, 360 500
+				C320 468, 270 458, 248 490
+				C226 522, 270 538, 312 522
+				C354 506, 400 528, 388 562
+				C376 596, 318 590, 286 612
+				C254 634, 292 658, 336 646
+				C380 634, 424 658, 408 692
+				C392 726, 330 718, 300 744
+				C270 770, 318 792, 320 820
+				C250 840, 200 860, 196 860
+				C168 830, 170 790, 176 750
+				C182 700, 174 650, 180 600
+				C186 555, 178 510, 196 478
+				C214 448, 250 438, 300 436
+				H430
+				C478 436, 500 458, 504 500
+				V760
+				C504 810, 478 848, 430 868
+				C390 884, 360 900, 340 930
+				V990"/>
 
 			<g id="bolus-cloud"></g>
-
-			<!-- labels -->
-			<g font-family="ui-monospace,monospace" font-size="9" fill="#9a9789">
-				<text x="64" y="250">liver</text>
-				<text x="312" y="250">stomach</text>
-				<text x="48" y="560">cecum</text>
-				<text x="318" y="560">descending</text>
-				<text x="222" y="668">rectum</text>
-			</g>
 		</svg>
 		<div id="clock-wrap">
-			<div id="clock">Plate. Pick food.</div>
+			<div id="clock">The model is the event. The panel names it.</div>
 			<div id="pH">pH —</div>
 		</div>
 	</section>
 	<aside class="lab">
-		<h2>Who is eating</h2>
+		<h2>What you are seeing</h2>
+		<div id="seeing-title">Ready to eat</div>
+		<p id="seeing-copy">The organs are placed as in a living anterior torso: liver on the patient’s right, J-shaped stomach on the left, small bowel coiled in the middle, large bowel framing it with haustra.</p>
 		<div class="who">
 			<button>nervous</button>
 			<button>endocrine</button>
@@ -220,7 +286,6 @@ body[data-view="xray"] .hint-x{display:block}
 		</div>
 		<p class="note" id="meal-label">White rice</p>
 		<div id="macros"></div>
-		<h2>Ingredients</h2>
 		<ul id="ingredients"></ul>
 		<h2>Chemistry</h2>
 		<ul id="chem"></ul>
@@ -232,16 +297,16 @@ body[data-view="xray"] .hint-x{display:block}
 		<div id="systems"></div>
 		<p id="bristol-read" class="note"></p>
 		<div id="long" hidden></div>
-		<h2>Proof — experiment, not vibe</h2>
+		<h2>Proof</h2>
 		<div id="proof"></div>
 	</aside>
 </main>
 <footer>
 	<button class="eat" id="eat">Eat this</button>
 	<button class="ghost" id="pause">Pause</button>
-	<label class="chk">Speed <input id="speed" type="range" min="0.4" max="6" step="0.1" value="1"> <span id="speed-read">1.0× after the swallow</span></label>
+	<label class="chk">Speed <input id="speed" type="range" min="0.4" max="6" step="0.1" value="1"> <span id="speed-read">1.0×</span></label>
 	<input id="scrub" type="range" min="0" max="48" step="0.1" value="0" aria-label="Hours after swallow">
-	<p class="note">Educational model, not medical advice. Transit is a band. Bristol is a prior. Mute is on until you uncheck it — farts only if leftover carb ferments.</p>
+	<p class="note">Model, not a diagnosis. Original illustration — not copied from WebMD / NatGeo.</p>
 </footer>
 <script src="./js/engine.js"></script>
 <script src="./js/audio.js"></script>

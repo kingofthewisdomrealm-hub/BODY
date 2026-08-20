@@ -154,7 +154,7 @@ function highlight(stage) {
 
 function drawEpiglottis(on) {
 	const flap = $('#epiglottis-flap')
-	if (flap) flap.setAttribute('transform', on ? 'rotate(52 210 128)' : 'rotate(0 210 128)')
+	if (flap) flap.setAttribute('transform', on ? 'rotate(52 320 124)' : 'rotate(0 320 124)')
 }
 
 function drawJaw(on) {
@@ -183,7 +183,7 @@ function drawParticles(state) {
 		const jitter = kind === 'fat' ? 7 : 4
 		const x = pt.x + Math.sin(i * 1.7 + ui.hours) * jitter
 		const y = pt.y + Math.cos(i * 1.3 + ui.hours * 0.8) * jitter
-		const r = kind === 'fiber' ? 3.2 : kind === 'fat' ? 2.8 : 2.2
+		const r = kind === 'fiber' ? 4.4 : kind === 'fat' ? 3.8 : 3.1
 		const c = barium ? '#e8eef2' : particleColor(state, kind)
 		const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
 		circle.setAttribute('cx', x)
@@ -218,10 +218,10 @@ function drawParticles(state) {
 function drawXrayGas(state) {
 	const g = $('#bolus-cloud')
 	const spots = [
-		[268, 270],
-		[122, 430],
-		[300, 430],
-		[210, 348]
+		[455, 350],
+		[196, 620],
+		[504, 620],
+		[340, 436]
 	]
 	spots.forEach(([x, y], i) => {
 		const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
@@ -234,9 +234,9 @@ function drawXrayGas(state) {
 	})
 	if (state.inColon > 0.2) {
 		const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
-		c.setAttribute('cx', 210)
-		c.setAttribute('cy', 500)
-		c.setAttribute('r', 22)
+		c.setAttribute('cx', 340)
+		c.setAttribute('cy', 760)
+		c.setAttribute('r', 28)
 		c.setAttribute('fill', '#6a6a6a')
 		c.setAttribute('opacity', '0.35')
 		g.appendChild(c)
@@ -288,14 +288,44 @@ function particleColor(state, kind) {
 
 function drawClock(state) {
 	const clock = $('#clock')
-	if (ui.phase === 'idle') clock.textContent = 'Plate. Pick food. Six systems will eat it.'
-	else if (ui.phase === 'cephalic') clock.textContent = 'Cephalic phase — brain already turning on saliva and acid'
-	else if (ui.phase === 'chew') clock.textContent = 'Chewing — last voluntary work'
-	else if (ui.phase === 'swallow') clock.textContent = 'Swallow — epiglottis covers the airway'
-	else clock.textContent = formatHours(state.hours) + '  ·  ' + labelStage(state.stage) + '  ·  ' + state.appearance
+	const title = $('#seeing-title')
+	const copy = $('#seeing-copy')
+	if (ui.phase === 'idle') {
+		clock.textContent = 'Pick food on the model. Then eat.'
+		title.textContent = 'Ready to eat'
+		copy.textContent = 'This is a living anterior torso. Liver sits on the patient’s right (your left). Stomach is the pink J under the left ribs. Small bowel fills the middle. Large bowel frames it in pouches (haustra).'
+	} else if (ui.phase === 'cephalic') {
+		clock.textContent = 'Before the bite'
+		title.textContent = 'Cephalic phase'
+		copy.textContent = 'Nothing has entered the tube yet. You are watching salivary glands and the stomach get a vagal head-start from sight and smell.'
+	} else if (ui.phase === 'chew') {
+		clock.textContent = 'In the mouth'
+		title.textContent = 'Chewing'
+		copy.textContent = 'Teeth and tongue are fracturing the bite. Watch particle size drop. Saliva wets it into a bolus. This is the last voluntary step.'
+	} else if (ui.phase === 'swallow') {
+		clock.textContent = 'Airway vs food'
+		title.textContent = 'Swallow'
+		copy.textContent = 'The pink flap (epiglottis) covers the dashed blue trachea. The bolus is squeezed down the esophagus. Gravity is optional.'
+	} else {
+		clock.textContent = formatHours(state.hours) + '  ·  ' + state.appearance
+		title.textContent = labelStage(state.stage)
+		copy.textContent = seeingCopy(state)
+	}
 
 	$('#pH').textContent = `pH ${state.pH}`
 	$('#bristol-read').textContent = `Bristol ${state.bristol} — ${BRISTOL[state.bristol - 1]}`
+}
+
+function seeingCopy(state) {
+	return {
+		esophagus: 'The pink tube behind the trachea is stripping the bolus toward the cardia. The ring at the diaphragm is the lower esophageal sphincter.',
+		stomach: 'The pale J under the left ribs is churning chyme. Fat stays higher and leaves slower. Only bits ≲ 2 mm should pass the pylorus.',
+		duodenum: 'The C-loop around the tan pancreas. Green gallbladder is dumping bile. That cloudy mix is emulsified fat.',
+		jejunum: 'Packed pink coils — this is most of the 10-foot living small bowel. Volume should fall as water and nutrients cross into blood and lymph.',
+		ileum: 'Still coils. Residue, bile-salt recycling, B12 if intrinsic factor came from the stomach.',
+		colon: 'The thicker peach frame. Those dents are haustra. Brown happens here. Bubbles mean leftover carb is being fermented.',
+		rectum: 'The last vertical segment. Form follows the Bristol prior for this meal — a model, not your toilet.'
+	}[state.stage] || 'Follow the highlighted organ. The side panel is naming the chemistry of what you are watching.'
 }
 
 function formatHours(h) {
