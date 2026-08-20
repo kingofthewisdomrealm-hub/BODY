@@ -24,9 +24,10 @@ header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:8px 16px;
 .toggle button{background:none;border:0;color:var(--dim);font:inherit;font-size:12px;padding:5px 11px;border-radius:999px;cursor:pointer}
 .toggle button.on{background:var(--gold);color:#17140c;font-weight:600}
 label.chk{font-size:12px;color:var(--dim);display:flex;gap:6px;align-items:center}
-main{display:grid;grid-template-columns:1fr 320px;min-height:0}
+main{display:grid;grid-template-columns:1fr 360px;min-height:0}
 @media (max-width:900px){main{grid-template-columns:1fr}}
-.viewport{position:relative;min-width:0;background:radial-gradient(ellipse at 50% 30%,#152033 0%,#07080c 70%)}
+.viewport{position:relative;min-width:0;background:
+	radial-gradient(ellipse at 50% 18%,#1c334c 0%,#0a1018 42%,#07080c 74%)}
 svg.body{width:100%;height:100%;display:block}
 #tray{position:absolute;left:10px;top:10px;width:148px;max-height:calc(100% - 70px);overflow:auto;z-index:6;padding:0;border:0;background:transparent}
 #tray h2{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin:0 0 8px}
@@ -41,24 +42,17 @@ body.over-mouth #mouth-target{opacity:1;fill-opacity:.22}
 .food b{font-size:12px;display:block}
 .food small{display:block;color:var(--faint);font-size:10px}
 .swatch{width:10px;height:10px;border-radius:99px;background:var(--c);flex-shrink:0}
-#clock-wrap{position:absolute;left:170px;right:16px;bottom:10px;display:flex;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);pointer-events:none;text-shadow:0 1px 8px #000}
+#clock-wrap{position:absolute;left:170px;right:88px;bottom:10px;display:flex;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);pointer-events:none;text-shadow:0 1px 8px #000}
 aside.lab{border-left:1px solid var(--line);overflow:auto;padding:16px 18px 40px;background:#0c0e14}
-aside.lab h2{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);margin:18px 0 8px;font-weight:500}
-aside.lab h2:first-child{margin-top:0}
-#seeing-title{font-family:var(--serif);font-size:26px;font-weight:400;margin:0 0 8px;letter-spacing:-.02em;line-height:1.15}
-#seeing-copy{color:var(--dim);font-size:14.5px;line-height:1.5;margin:0 0 14px}
-.who{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
-.who button{border:1px solid var(--line);background:#15171f;color:var(--dim);font:inherit;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;padding:4px 7px;border-radius:99px}
-.who button.on{color:#17140c;background:var(--gold);border-color:var(--gold)}
-#macros{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}
-#macros span{font-size:10px;color:var(--dim);background:#15171f;padding:4px 7px;border-radius:6px;border:1px solid var(--line)}
-#macros b{color:var(--ink);display:block;font-size:12px}
-.lab ul{margin:0 0 10px;padding-left:16px;color:var(--dim);font-size:13px;line-height:1.4}
-.lab li{margin-bottom:5px}
-.sys{border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:7px;background:#15171f}
-.sys i{font-style:normal;font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
-.sys span{float:right;font-size:10px;color:var(--faint)}
-.sys p{margin:5px 0 0;font-size:12.5px;color:var(--dim)}
+.booth-top{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.booth-kicker{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);margin:0}
+#live-pill{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;padding:4px 8px;border-radius:99px;background:#2a2d38;color:var(--faint)}
+#live-pill.hot{background:#b33;color:#fff;animation:livepulse 1.4s ease-in-out infinite}
+#live-pill.paused{background:var(--gold);color:#17140c}
+@keyframes livepulse{0%,100%{opacity:1}50%{opacity:.55}}
+#call-title{font-family:var(--serif);font-size:28px;font-weight:400;margin:0 0 10px;letter-spacing:-.02em;line-height:1.12}
+#call-line{color:var(--ink);font-size:16px;line-height:1.45;margin:0 0 10px}
+#call-aside{color:var(--dim);font-size:13.5px;line-height:1.5;margin:0 0 16px}
 .proof{border-left:3px solid var(--sage);background:#10151c;padding:9px 11px;margin-bottom:9px}
 .proof.range{border-left-color:var(--sky)}
 .proof.contested{border-left-color:var(--rust)}
@@ -69,18 +63,38 @@ aside.lab h2:first-child{margin-top:0}
 footer{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:8px 14px;border-top:1px solid var(--line);background:#0b0c10}
 button.eat{background:var(--gold);border:0;color:#17140c;font-weight:700;padding:9px 16px;border-radius:999px;cursor:pointer}
 button.ghost{background:transparent;border:1px solid var(--line);color:var(--ink);padding:7px 12px;border-radius:999px;cursor:pointer}
+button.ghost:disabled, .pause-fab:disabled{opacity:.35;cursor:default}
+#pause{min-width:88px;border-color:var(--gold);color:var(--gold)}
+body.is-paused #pause{background:var(--gold);color:#17140c;font-weight:700}
 #scrub{flex:1;min-width:120px}
 .note{font-size:11px;color:var(--faint)}
 [data-organ]{transition:filter .25s, opacity .25s}
 [data-organ].hot{filter:url(#hotglow)}
-body[data-view="xray"] .flesh{opacity:.2}
-body[data-view="xray"] .organ{filter:grayscale(1) brightness(.7)}
-body[data-view="xray"] .bone{opacity:.85}
+body[data-view="xray"] .flesh{opacity:.18}
+body[data-view="xray"] .organ{filter:grayscale(1) brightness(.65) contrast(1.15)}
+body[data-view="xray"] .bone{opacity:.9}
+body[data-view="xray"] .vessel{opacity:.05}
 body[data-view="barium"] .organ{opacity:.55}
 .hint{position:absolute;left:170px;top:12px;font-size:11px;color:var(--faint);pointer-events:none}
 .hint-x{display:none}
 body[data-view="xray"] .hint-x{display:block}
 #ingredients{display:none}
+.pause-fab{
+	position:absolute;right:16px;bottom:44px;z-index:8;
+	width:64px;height:64px;border-radius:99px;border:0;
+	background:var(--gold);color:#17140c;font-size:18px;font-weight:700;
+	cursor:pointer;box-shadow:0 10px 28px rgba(0,0,0,.45);
+}
+.pause-fab.is-paused{background:var(--rust);color:#fff}
+#paused-banner{
+	display:none;position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);
+	z-index:7;pointer-events:none;text-align:center;
+	font-family:var(--serif);font-size:42px;letter-spacing:.04em;color:#fff;
+	text-shadow:0 8px 40px #000;
+}
+#paused-banner small{display:block;font-family:var(--sans);font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-top:8px}
+body.is-paused #paused-banner{display:block}
+#meal-label,#bristol-read{margin:0 0 8px}
 </style>
 </head>
 <body data-view="anatomy" data-phase="idle">
@@ -94,111 +108,183 @@ body[data-view="xray"] .hint-x{display:block}
 		<button data-view="exchange">Exchange</button>
 	</div>
 	<label class="chk"><input type="checkbox" id="lactase" checked> Lactase</label>
-	<label class="chk"><input type="checkbox" id="mute" checked> Mute</label>
+	<label class="chk"><input type="checkbox" id="mute"> Mute</label>
 	<label class="chk"><input type="checkbox" id="everyday"> Every day</label>
 </header>
 <main>
 	<section class="viewport">
 		<section id="tray"><h2>Plate</h2></section>
-		<p class="hint">Drag a food onto the mouth.</p>
+		<p class="hint">Drag a food onto the mouth. Pause to read the booth. Spacebar works.</p>
 		<p class="hint hint-x" style="top:32px">Plain film: gas and bone. The meal is invisible.</p>
 		<svg class="body" viewBox="0 0 640 1080" role="img" aria-label="Digestive organs in a living torso">
 			<defs>
-				<linearGradient id="skin" x1="0" y1="0" x2="1" y2="1">
-					<stop offset="0%" stop-color="#3d6a8c" stop-opacity=".18"/>
-					<stop offset="100%" stop-color="#0b1c2c" stop-opacity=".5"/>
+				<linearGradient id="skin" x1="0" y1="0" x2="0.15" y2="1">
+					<stop offset="0%" stop-color="#c9a394" stop-opacity=".28"/>
+					<stop offset="35%" stop-color="#8a5a4a" stop-opacity=".16"/>
+					<stop offset="100%" stop-color="#1a1210" stop-opacity=".55"/>
 				</linearGradient>
-				<linearGradient id="gLiver" x1="0" y1="0" x2="1" y2="1">
-					<stop offset="0%" stop-color="#a34a3d"/>
-					<stop offset="45%" stop-color="#7a2f28"/>
-					<stop offset="100%" stop-color="#4e1c18"/>
-				</linearGradient>
-				<radialGradient id="gStomach" cx="38%" cy="30%" r="70%">
-					<stop offset="0%" stop-color="#f7d4cc"/>
-					<stop offset="55%" stop-color="#e8a39a"/>
-					<stop offset="100%" stop-color="#c46b6b"/>
+				<radialGradient id="gLiver" cx="42%" cy="28%" r="78%">
+					<stop offset="0%" stop-color="#c45a42"/>
+					<stop offset="28%" stop-color="#8f3328"/>
+					<stop offset="62%" stop-color="#6a221c"/>
+					<stop offset="100%" stop-color="#3a1210"/>
+				</radialGradient>
+				<radialGradient id="gStomach" cx="36%" cy="22%" r="72%">
+					<stop offset="0%" stop-color="#fbe6df"/>
+					<stop offset="38%" stop-color="#e8b0a4"/>
+					<stop offset="78%" stop-color="#c56e68"/>
+					<stop offset="100%" stop-color="#9a4848"/>
 				</radialGradient>
 				<linearGradient id="gPanc" x1="0" y1="0" x2="1" y2="1">
-					<stop offset="0%" stop-color="#f0e0b0"/>
-					<stop offset="100%" stop-color="#c9ae72"/>
+					<stop offset="0%" stop-color="#f4e4b8"/>
+					<stop offset="55%" stop-color="#d4b87a"/>
+					<stop offset="100%" stop-color="#b08a52"/>
 				</linearGradient>
-				<linearGradient id="gGB" x1="0" y1="0" x2="0" y2="1">
-					<stop offset="0%" stop-color="#b7d45c"/>
-					<stop offset="100%" stop-color="#5a8a28"/>
+				<linearGradient id="gGB" x1="0" y1="0" x2="0.4" y2="1">
+					<stop offset="0%" stop-color="#d4ee78"/>
+					<stop offset="50%" stop-color="#8bb83a"/>
+					<stop offset="100%" stop-color="#4a7a18"/>
 				</linearGradient>
 				<linearGradient id="gSI" x1="0" y1="0" x2="1" y2="1">
-					<stop offset="0%" stop-color="#f0b2a4"/>
-					<stop offset="100%" stop-color="#d47a6c"/>
+					<stop offset="0%" stop-color="#f6c4b4"/>
+					<stop offset="100%" stop-color="#c86a5c"/>
 				</linearGradient>
-				<linearGradient id="gColon" x1="0" y1="0" x2="0" y2="1">
-					<stop offset="0%" stop-color="#f0c8a0"/>
-					<stop offset="100%" stop-color="#d49a6a"/>
+				<linearGradient id="gColon" x1="0" y1="0" x2="0.2" y2="1">
+					<stop offset="0%" stop-color="#f3d2a8"/>
+					<stop offset="45%" stop-color="#d4a06a"/>
+					<stop offset="100%" stop-color="#b07848"/>
 				</linearGradient>
 				<linearGradient id="gEso" x1="0" y1="0" x2="1" y2="0">
-					<stop offset="0%" stop-color="#e8a090"/>
-					<stop offset="100%" stop-color="#c87878"/>
+					<stop offset="0%" stop-color="#d08078"/>
+					<stop offset="50%" stop-color="#e8a898"/>
+					<stop offset="100%" stop-color="#c07070"/>
 				</linearGradient>
-				<filter id="soft"><feGaussianBlur stdDeviation="1.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-				<filter id="hotglow">
-					<feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#f0d9a0" flood-opacity=".9"/>
+				<radialGradient id="gLip" cx="50%" cy="40%" r="70%">
+					<stop offset="0%" stop-color="#c45a5c"/>
+					<stop offset="100%" stop-color="#7a2830"/>
+				</radialGradient>
+				<filter id="bump" x="-12%" y="-12%" width="124%" height="124%">
+					<feTurbulence type="fractalNoise" baseFrequency="0.032" numOctaves="3" seed="4" result="noise"/>
+					<feDiffuseLighting in="noise" lighting-color="#fff8f0" surfaceScale="2.6" result="diff">
+						<feDistantLight azimuth="225" elevation="52"/>
+					</feDiffuseLighting>
+					<feComposite in="diff" in2="SourceGraphic" operator="in" result="clip"/>
+					<feBlend in="SourceGraphic" in2="clip" mode="soft-light" result="lit"/>
+					<feDropShadow dx="1.6" dy="4.5" stdDeviation="3.2" flood-color="#000" flood-opacity=".42"/>
 				</filter>
-				<filter id="depth"><feDropShadow dx="1" dy="3" stdDeviation="2.4" flood-color="#000" flood-opacity=".35"/></filter>
+				<filter id="mucosa" x="-8%" y="-8%" width="116%" height="116%">
+					<feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="11" result="n"/>
+					<feColorMatrix in="n" type="matrix" values="0 0 0 0 0.55  0 0 0 0 0.22  0 0 0 0 0.18  0 0 0 0.18 0"/>
+					<feBlend in="SourceGraphic" mode="multiply"/>
+					<feDropShadow dx="1" dy="3" stdDeviation="2.4" flood-color="#000" flood-opacity=".35"/>
+				</filter>
+				<filter id="soft"><feGaussianBlur stdDeviation="0.8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+				<filter id="hotglow">
+					<feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="#f0d9a0" flood-opacity=".95"/>
+				</filter>
+				<filter id="depth"><feDropShadow dx="1.2" dy="3.5" stdDeviation="2.6" flood-color="#000" flood-opacity=".4"/></filter>
+				<filter id="skinSoft">
+					<feGaussianBlur stdDeviation="0.45"/>
+					<feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#04060a" flood-opacity=".55"/>
+				</filter>
 			</defs>
 
-			<!-- translucent body -->
-			<path class="flesh" fill="url(#skin)" stroke="#4a7394" stroke-width="1.2" d="M320 18c-34 0-62 28-62 64 0 14 5 28 14 38h-10c-7 10-12 22-12 36v22c-58 18-96 70-108 128-8 38-6 78 4 112 12 42 28 70 28 112v86c0 36-8 62-8 98v110c0 22 14 34 32 34h28v-108c0-24 8-36 24-36h70c16 0 24 12 24 36v108h28c18 0 32-12 32-34v-110c0-36-8-62-8-98v-86c0-42 16-70 28-112 10-34 12-74 4-112-12-58-50-110-108-128v-22c0-14-5-26-12-36h-10c9-10 14-24 14-38 0-36-28-64-62-64z"/>
-			<!-- faint ribs / spine -->
-			<g class="bone" opacity=".22" fill="none" stroke="#d9e6f0" stroke-width="3">
-				<path d="M320 200 v210"/>
-				<path d="M250 230 q70 -18 140 0"/>
-				<path d="M242 258 q78 -16 156 0"/>
-				<path d="M238 286 q82 -14 164 0"/>
-				<path d="M240 314 q80 -12 160 0"/>
-				<ellipse cx="320" cy="500" rx="22" ry="12"/>
+			<path class="flesh" fill="url(#skin)" filter="url(#skinSoft)" stroke="#6a4a40" stroke-width="1.1" d="M320 14c-36 0-66 26-70 62-2 16 4 32 14 44h-12c-8 12-14 26-14 42v18c-62 16-104 72-118 132-10 42-8 84 4 122 14 46 32 76 32 122v88c0 38-10 66-10 104v112c0 24 16 38 36 38h30v-112c0-26 10-40 28-40h76c18 0 28 14 28 40v112h30c20 0 36-14 36-38v-112c0-38-10-66-10-104v-88c0-46 18-76 32-122 12-38 14-80 4-122-14-60-56-116-118-132v-18c0-16-6-30-14-42h-12c10-12 16-28 14-44-4-36-34-62-70-62z"/>
+			<path class="flesh" fill="none" stroke="#5a4038" stroke-width="0.6" opacity=".35" d="M268 200 C250 280, 248 360, 258 430 M372 200 C390 280, 392 360, 382 430"/>
+
+			<g class="bone" opacity=".28" fill="none" stroke="#e8f0f6" stroke-linecap="round">
+				<path stroke-width="5" d="M320 188 v248"/>
+				<rect x="312" y="198" width="16" height="96" rx="3" fill="#d5e2ec" stroke="none" opacity=".55"/>
+				<path stroke-width="3.2" d="M248 214 q72 -22 144 0"/>
+				<path stroke-width="3.2" d="M240 242 q80 -20 160 0"/>
+				<path stroke-width="3.1" d="M234 270 q86 -18 172 0"/>
+				<path stroke-width="3" d="M232 298 q88 -16 176 0"/>
+				<path stroke-width="2.9" d="M236 326 q84 -14 168 0"/>
+				<path stroke-width="2.7" d="M244 354 q76 -12 152 0"/>
+				<path stroke-width="2.4" d="M252 380 q68 -10 136 0"/>
+				<path stroke="#c9d8e4" stroke-width="2.4" d="M252 208 C220 200, 188 206, 168 218"/>
+				<path stroke="#c9d8e4" stroke-width="2.4" d="M388 208 C420 200, 452 206, 472 218"/>
+				<ellipse cx="320" cy="508" rx="26" ry="14" fill="#d5e2ec" stroke="none" opacity=".4"/>
 			</g>
 
-			<ellipse data-organ="parotid" class="organ" cx="252" cy="78" rx="14" ry="18" fill="#e8d5c4" filter="url(#depth)"/>
-			<ellipse data-organ="parotid" class="organ" cx="388" cy="78" rx="14" ry="18" fill="#e8d5c4" filter="url(#depth)"/>
+			<path fill="none" stroke="#c4a090" stroke-width="10" stroke-linecap="round" opacity=".28" d="M128 318 C198 242, 268 248, 320 272 C372 248, 448 236, 522 312"/>
+
+			<path class="vessel" fill="none" stroke="#6a1828" stroke-width="3.2" opacity=".22" d="M318 620 C286 540, 248 430, 214 348"/>
+			<path class="vessel" fill="none" stroke="#5a2030" stroke-width="2" opacity=".18" d="M360 640 C340 560, 300 500, 268 430"/>
+
+			<ellipse data-organ="parotid" class="organ" cx="248" cy="76" rx="16" ry="20" fill="#e6d2c0" filter="url(#depth)"/>
+			<ellipse data-organ="parotid" class="organ" cx="392" cy="76" rx="16" ry="20" fill="#e6d2c0" filter="url(#depth)"/>
+			<path fill="none" stroke="#d8c4b0" stroke-width="1.4" opacity=".7" d="M262 88 C280 94, 298 96, 310 98"/>
+			<path fill="none" stroke="#d8c4b0" stroke-width="1.4" opacity=".7" d="M378 88 C360 94, 342 96, 330 98"/>
 
 			<g id="jaw">
-				<ellipse data-organ="mouth" class="organ" cx="320" cy="98" rx="28" ry="12" fill="#8a3d48"/>
+				<ellipse data-organ="mouth" class="organ" cx="320" cy="99" rx="32" ry="14" fill="url(#gLip)"/>
+				<ellipse cx="320" cy="97" rx="26" ry="8" fill="#4a1820"/>
 				<g data-organ="teeth">
-					<rect x="302" y="91" width="7" height="8" rx="1" fill="#f3ead8"/>
-					<rect x="311" y="91" width="7" height="8" rx="1" fill="#f3ead8"/>
-					<rect x="320" y="91" width="7" height="8" rx="1" fill="#f3ead8"/>
-					<rect x="329" y="91" width="7" height="8" rx="1" fill="#f3ead8"/>
+					<rect x="294" y="90" width="6.2" height="8.5" rx="1" fill="#f6efe0"/>
+					<rect x="301" y="89.5" width="6.4" height="9" rx="1" fill="#f8f1e4"/>
+					<rect x="308" y="89" width="6.6" height="9.2" rx="1" fill="#f4ecdc"/>
+					<rect x="315.2" y="89" width="6.6" height="9.4" rx="1" fill="#f8f2e6"/>
+					<rect x="322.2" y="89" width="6.6" height="9.4" rx="1" fill="#f4ecdc"/>
+					<rect x="329.2" y="89.5" width="6.4" height="9" rx="1" fill="#f8f1e4"/>
+					<rect x="336" y="90" width="6.2" height="8.5" rx="1" fill="#f6efe0"/>
 				</g>
 			</g>
+			<ellipse id="tongue" data-organ="tongue" class="organ" cx="320" cy="106" rx="18" ry="7" fill="#c45a5c" opacity=".9"/>
 			<ellipse id="mouth-target" cx="320" cy="98" rx="48" ry="32" fill="#d4a24c" fill-opacity="0.08" stroke="#d4a24c" stroke-width="2" stroke-dasharray="5 5" opacity="0"/>
 			<g id="epiglottis-flap" data-organ="epiglottis">
-				<path d="M312 124 q8 -16 16 0" fill="#d47a7a"/>
+				<path d="M310 124 q10 -18 20 0 q-10 8 -20 0" fill="#d47a7a"/>
 			</g>
-			<path fill="none" stroke="#6f92b8" stroke-width="4" stroke-dasharray="5 4" d="M320 128 v70" opacity=".65"/>
+			<path fill="none" stroke="#6f92b8" stroke-width="3.5" stroke-dasharray="5 4" d="M320 128 v70" opacity=".55"/>
 
-			<!-- esophagus -->
-			<path data-organ="esophagus" class="organ" fill="none" stroke="url(#gEso)" stroke-width="16" stroke-linecap="round" filter="url(#depth)" d="M320 128 C318 190, 322 240, 328 286 C332 308, 344 322, 358 330"/>
-			<circle data-organ="les" class="organ" cx="360" cy="332" r="7" fill="#c46b6b"/>
+			<path data-organ="esophagus" class="organ" fill="none" stroke="url(#gEso)" stroke-width="15" stroke-linecap="round" filter="url(#depth)" d="M320 128 C318 190, 322 240, 328 286 C332 308, 344 322, 358 330"/>
+			<path fill="none" stroke="#9a5048" stroke-width="2" opacity=".35" d="M314 140 C312 200, 316 250, 322 290"/>
+			<circle data-organ="les" class="organ" cx="360" cy="332" r="8" fill="#c46b6b"/>
+			<circle cx="360" cy="332" r="3.5" fill="#7a3030" opacity=".5"/>
 
-			<!-- pancreas behind stomach / in C-loop -->
-			<path data-organ="pancreas" class="organ" filter="url(#depth)" fill="url(#gPanc)" d="M300 400 C330 386, 390 384, 455 402 C468 408, 462 422, 400 420 C350 418, 312 428, 292 442 C286 430, 290 408, 300 400Z"/>
+			<path data-organ="pancreas" class="organ" filter="url(#bump)" fill="url(#gPanc)" d="M296 402
+				C328 384, 392 382, 458 402
+				C472 408, 470 424, 402 422
+				C354 420, 318 432, 290 446
+				C282 430, 286 408, 296 402Z"/>
+			<path fill="none" stroke="#a88850" stroke-width="1.3" opacity=".45" d="M308 412 C360 400, 420 402, 452 412"/>
+			<path fill="none" stroke="#c4a06a" stroke-width="0.8" opacity=".35" d="M320 408 l4 10 M340 404 l3 11 M368 400 l2 12 M400 402 l0 11 M428 406 l-2 10"/>
 
-			<!-- small intestine packed coils (behind colon frame) -->
-			<path data-organ="smallbowel" class="organ" fill="none" stroke="url(#gSI)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" filter="url(#depth)" d="M360 455
-				C320 468, 270 458, 248 490
-				C226 522, 270 538, 312 522
-				C354 506, 400 528, 388 562
-				C376 596, 318 590, 286 612
-				C254 634, 292 658, 336 646
-				C380 634, 424 658, 408 692
-				C392 726, 330 718, 300 744
-				C270 770, 318 792, 358 778
-				C398 764, 430 790, 410 818
-				C390 846, 340 838, 320 860"/>
-			<path data-organ="duodenum" class="organ" fill="none" stroke="#e09484" stroke-width="16" stroke-linecap="round" d="M348 418 C310 426, 286 446, 292 476 C300 508, 340 518, 368 500"/>
+			<g data-organ="smallbowel" class="organ" filter="url(#depth)">
+				<path fill="none" stroke="#c87868" stroke-width="15" stroke-linecap="round" opacity=".55" d="M300 500
+					C250 520, 240 560, 288 572
+					C336 584, 350 620, 310 640
+					C270 660, 300 700, 348 688
+					C396 676, 410 720, 362 742
+					C314 764, 340 800, 380 792"/>
+				<path fill="none" stroke="url(#gSI)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" d="M360 455
+					C320 468, 270 458, 248 490
+					C226 522, 270 538, 312 522
+					C354 506, 400 528, 388 562
+					C376 596, 318 590, 286 612
+					C254 634, 292 658, 336 646
+					C380 634, 424 658, 408 692
+					C392 726, 330 718, 300 744
+					C270 770, 318 792, 358 778
+					C398 764, 430 790, 410 818
+					C390 846, 340 838, 320 860"/>
+				<path fill="none" stroke="#f0c8bc" stroke-width="4" stroke-dasharray="3 11" stroke-linecap="round" opacity=".4" d="M360 455
+					C320 468, 270 458, 248 490
+					C226 522, 270 538, 312 522
+					C354 506, 400 528, 388 562
+					C376 596, 318 590, 286 612
+					C254 634, 292 658, 336 646
+					C380 634, 424 658, 408 692
+					C392 726, 330 718, 300 744
+					C270 770, 318 792, 358 778
+					C398 764, 430 790, 410 818
+					C390 846, 340 838, 320 860"/>
+			</g>
+			<path data-organ="duodenum" class="organ" fill="none" stroke="#e09484" stroke-width="17" stroke-linecap="round" filter="url(#depth)" d="M348 418 C310 426, 286 446, 292 476 C300 508, 340 518, 368 500"/>
+			<path fill="none" stroke="#f0c0b0" stroke-width="3" opacity=".35" d="M348 418 C310 426, 286 446, 292 476 C300 508, 340 518, 368 500"/>
 
-			<!-- colon with haustra: thick peach frame -->
-			<g data-organ="colon" class="organ" filter="url(#depth)">
-				<path fill="none" stroke="url(#gColon)" stroke-width="34" stroke-linecap="round" stroke-linejoin="round" d="M196 860
+			<g data-organ="colon" class="organ" filter="url(#bump)">
+				<path fill="none" stroke="url(#gColon)" stroke-width="36" stroke-linecap="round" stroke-linejoin="round" d="M196 860
 					C168 830, 170 790, 176 750
 					C182 700, 174 650, 180 600
 					C186 555, 178 510, 196 478
@@ -208,7 +294,41 @@ body[data-view="xray"] .hint-x{display:block}
 					V760
 					C504 810, 478 848, 430 868
 					C390 884, 360 900, 340 930"/>
-				<path fill="none" stroke="#c48a5a" stroke-width="34" stroke-dasharray="7 26" stroke-linecap="butt" opacity=".32" d="M196 860
+				<g fill="#e0b080" stroke="#c48a5a" stroke-width="0.6" opacity=".88">
+					<ellipse cx="190" cy="852" rx="20" ry="15"/>
+					<ellipse cx="184" cy="822" rx="19" ry="14"/>
+					<ellipse cx="180" cy="792" rx="19" ry="14"/>
+					<ellipse cx="178" cy="762" rx="18" ry="14"/>
+					<ellipse cx="176" cy="732" rx="18" ry="13"/>
+					<ellipse cx="176" cy="702" rx="18" ry="13"/>
+					<ellipse cx="178" cy="672" rx="18" ry="13"/>
+					<ellipse cx="180" cy="642" rx="18" ry="13"/>
+					<ellipse cx="182" cy="612" rx="18" ry="13"/>
+					<ellipse cx="186" cy="582" rx="18" ry="13"/>
+					<ellipse cx="190" cy="552" rx="18" ry="13"/>
+					<ellipse cx="196" cy="524" rx="19" ry="13"/>
+					<ellipse cx="206" cy="498" rx="18" ry="14"/>
+					<ellipse cx="230" cy="456" rx="20" ry="14"/>
+					<ellipse cx="268" cy="440" rx="22" ry="15"/>
+					<ellipse cx="310" cy="434" rx="22" ry="14"/>
+					<ellipse cx="352" cy="434" rx="22" ry="14"/>
+					<ellipse cx="394" cy="436" rx="22" ry="14"/>
+					<ellipse cx="434" cy="444" rx="20" ry="15"/>
+					<ellipse cx="470" cy="462" rx="18" ry="16"/>
+					<ellipse cx="500" cy="498" rx="17" ry="16"/>
+					<ellipse cx="504" cy="536" rx="17" ry="16"/>
+					<ellipse cx="504" cy="576" rx="17" ry="16"/>
+					<ellipse cx="504" cy="616" rx="17" ry="16"/>
+					<ellipse cx="504" cy="656" rx="17" ry="16"/>
+					<ellipse cx="504" cy="696" rx="17" ry="16"/>
+					<ellipse cx="502" cy="736" rx="17" ry="16"/>
+					<ellipse cx="494" cy="776" rx="18" ry="15"/>
+					<ellipse cx="470" cy="812" rx="20" ry="15"/>
+					<ellipse cx="438" cy="844" rx="20" ry="14"/>
+					<ellipse cx="400" cy="868" rx="18" ry="14"/>
+					<ellipse cx="368" cy="892" rx="16" ry="14"/>
+				</g>
+				<path fill="none" stroke="#a86a40" stroke-width="3.2" stroke-linecap="round" opacity=".4" d="M196 860
 					C168 830, 170 790, 176 750
 					C182 700, 174 650, 180 600
 					C186 555, 178 510, 196 478
@@ -218,32 +338,43 @@ body[data-view="xray"] .hint-x{display:block}
 					V760
 					C504 810, 478 848, 430 868
 					C390 884, 360 900, 340 930"/>
-				<circle cx="198" cy="868" r="22" fill="#e0b080"/>
-				<path d="M214 878 q18 16 8 28" fill="none" stroke="#d4a070" stroke-width="7" stroke-linecap="round"/>
+				<circle cx="198" cy="868" r="24" fill="#e0b080"/>
+				<circle cx="198" cy="868" r="10" fill="#c49268" opacity=".35"/>
+				<path d="M214 878 q18 16 8 28" fill="none" stroke="#d4a070" stroke-width="8" stroke-linecap="round"/>
 			</g>
-			<path data-organ="rectum" class="organ" fill="none" stroke="#c49268" stroke-width="26" stroke-linecap="round" d="M340 930 V990"/>
+			<path data-organ="rectum" class="organ" fill="none" stroke="#c49268" stroke-width="28" stroke-linecap="round" d="M340 930 V990"/>
+			<path fill="none" stroke="#a87850" stroke-width="8" opacity=".3" d="M340 938 V982"/>
 
-			<!-- stomach J, patient's left = viewer's right -->
-			<path data-organ="stomach" class="organ" filter="url(#depth)" fill="url(#gStomach)" d="M358 330
-				C410 312, 478 322, 492 368
-				C504 412, 478 458, 428 472
-				C392 482, 362 468, 348 446
-				C338 430, 348 416, 372 420
-				C396 424, 430 408, 432 384
-				C434 358, 400 340, 358 330Z"/>
-			<ellipse cx="455" cy="350" rx="18" ry="12" fill="#f7ddd8" opacity=".45"/>
+			<path data-organ="stomach" class="organ" filter="url(#mucosa)" fill="url(#gStomach)" d="M358 330
+				C412 308, 484 318, 498 368
+				C512 416, 480 464, 428 476
+				C390 486, 358 470, 346 446
+				C336 428, 348 414, 374 420
+				C400 426, 434 408, 436 382
+				C438 354, 402 338, 358 330Z"/>
+			<g fill="none" stroke="#c47870" stroke-width="1.15" opacity=".38">
+				<path d="M390 348 C420 352, 448 368, 452 392"/>
+				<path d="M378 362 C410 368, 438 384, 440 404"/>
+				<path d="M372 378 C400 386, 422 400, 418 418"/>
+				<path d="M400 430 C418 438, 428 452, 412 464"/>
+			</g>
+			<ellipse cx="458" cy="348" rx="22" ry="14" fill="#f7ddd8" opacity=".5"/>
+			<ellipse cx="372" cy="424" rx="10" ry="8" fill="#b85a58" opacity=".45"/>
 
-			<!-- liver on top, patient's right = viewer's left -->
-			<path data-organ="liver" class="organ" filter="url(#depth)" fill="url(#gLiver)" d="M118 300
-				C122 252, 170 228, 230 232
-				C290 236, 338 262, 348 308
-				C356 348, 338 392, 300 418
-				C250 452, 180 458, 140 428
-				C108 404, 102 350, 118 300Z"/>
-			<path d="M230 250 C250 290, 255 340, 240 390" fill="none" stroke="#5c221c" stroke-width="2" opacity=".35"/>
-			<path data-organ="gallbladder" class="organ" filter="url(#depth)" fill="url(#gGB)" d="M236 368 C248 360, 258 368, 256 388 C254 410, 242 424, 228 418 C216 412, 222 376, 236 368Z"/>
+			<path data-organ="liver" class="organ" filter="url(#bump)" fill="url(#gLiver)" d="M112 296
+				C118 244, 168 216, 232 222
+				C292 228, 342 256, 352 306
+				C360 348, 344 394, 304 422
+				C254 458, 176 464, 132 430
+				C100 404, 96 344, 112 296Z"/>
+			<path d="M228 246 C252 292, 258 342, 242 396" fill="none" stroke="#4a1814" stroke-width="2.2" opacity=".4"/>
+			<path d="M168 300 C200 310, 250 318, 300 308" fill="none" stroke="#5c2018" stroke-width="1.4" opacity=".28"/>
+			<ellipse cx="186" cy="268" rx="42" ry="18" fill="#e09078" opacity=".18"/>
+			<ellipse cx="210" cy="360" rx="16" ry="10" fill="#3a1010" opacity=".28"/>
+			<path data-organ="gallbladder" class="organ" filter="url(#depth)" fill="url(#gGB)" d="M236 368 C250 358, 262 368, 260 390 C258 414, 244 428, 228 420 C214 412, 222 376, 236 368Z"/>
+			<path fill="none" stroke="#6a8a28" stroke-width="2.2" d="M248 372 C238 350, 226 338, 214 348"/>
+			<ellipse cx="246" cy="378" rx="6" ry="9" fill="#e8f4a0" opacity=".35"/>
 
-			<!-- transit path -->
 			<path id="gut-path" fill="none" stroke="none" d="M320 98
 				C320 112, 320 124, 320 128
 				C318 190, 322 240, 328 286
@@ -274,15 +405,21 @@ body[data-view="xray"] .hint-x{display:block}
 
 			<g id="bolus-cloud"></g>
 		</svg>
+		<div id="paused-banner">Paused<small>Read the booth · space to resume</small></div>
+		<button class="pause-fab" id="pause-fab" type="button" title="Pause" disabled>❚❚</button>
 		<div id="clock-wrap">
-			<div id="clock">The model is the event. The panel names it.</div>
+			<div id="clock">The model is the event. The booth calls it.</div>
 			<div id="pH">pH —</div>
 		</div>
 	</section>
 	<aside class="lab">
-		<h2>Narration</h2>
-		<div id="seeing-title">Drop food on the mouth</div>
-		<p id="seeing-copy">Grab something from the plate and drop it on the lips. You will watch it chewed into mush, swallowed, acid-churned, absorbed, fermented, and pooped — the model is the event; this column only names it.</p>
+		<div class="booth-top">
+			<p class="booth-kicker">The booth</p>
+			<span id="live-pill">STANDBY</span>
+		</div>
+		<div id="call-title">Waiting on a bite</div>
+		<p id="call-line">Drag anything off that plate and drop it on the mouth. I will call the whole trip — chew, mush, acid, heist, fermentation, poop.</p>
+		<p id="call-aside">Hit Pause any time the picture gets ahead of the words. Spacebar works too.</p>
 		<p class="note" id="meal-label"></p>
 		<p id="bristol-read" class="note"></p>
 		<ol id="log"></ol>
@@ -292,10 +429,10 @@ body[data-view="xray"] .hint-x{display:block}
 </main>
 <footer>
 	<button class="eat" id="eat">Eat selected</button>
-	<button class="ghost" id="pause">Pause</button>
+	<button class="ghost" id="pause" disabled>Pause</button>
 	<label class="chk">Speed <input id="speed" type="range" min="0.4" max="6" step="0.1" value="1"> <span id="speed-read">1.0×</span></label>
 	<input id="scrub" type="range" min="0" max="48" step="0.1" value="0" aria-label="Hours after swallow">
-	<p class="note">Model, not a diagnosis. Original illustration — not copied from WebMD / NatGeo.</p>
+	<p class="note">Model, not a diagnosis. Original illustration — not copied from WebMD / NatGeo. Unmute for the wet stuff.</p>
 </footer>
 <script src="./js/engine.js"></script>
 <script src="./js/audio.js"></script>

@@ -1,19 +1,25 @@
 const selected = new Set(['white-rice'])
 const ui = {
 	lactase: true,
-	muted: true,
+	muted: false,
 	view: 'anatomy',
 	everyDay: false,
 	playing: false,
+	paused: false,
 	phase: 'idle',
 	hours: 0,
 	speed: 1,
 	farted: false,
 	pooped: false,
+	bilePlayed: false,
+	acidPlayed: false,
 	lastSay: '',
 	log: [],
 	sparks: [],
-	chewFor: 4
+	chewFor: 4,
+	jawT: 0,
+	gurgleAcc: 0,
+	animT: 0
 }
 
 let meal = mix([...selected], { lactase: true })
@@ -30,7 +36,7 @@ const ANUS = { x: 340, y: 1000 }
 const STAGE_ORGANS = {
 	idle: ['mouth'],
 	cephalic: ['mouth', 'parotid'],
-	chew: ['mouth', 'parotid', 'teeth'],
+	chew: ['mouth', 'parotid', 'teeth', 'tongue'],
 	swallow: ['mouth', 'epiglottis', 'esophagus'],
 	esophagus: ['esophagus', 'les'],
 	stomach: ['stomach', 'les'],
@@ -45,11 +51,50 @@ function $(sel) {
 	return document.querySelector(sel)
 }
 
+function foodName() {
+	return meal.foods[0] ? meal.foods[0].name : 'the bite'
+}
+
+function foodId() {
+	return meal.foods[0] ? meal.foods[0].id : ''
+}
+
 function say(title, text) {
 	if (ui.lastSay === title) return
 	ui.lastSay = title
 	ui.log.unshift({ title, text })
-	ui.log = ui.log.slice(0, 10)
+	ui.log = ui.log.slice(0, 8)
+}
+
+function syncPause() {
+	const label = ui.paused ? 'Resume' : 'Pause'
+	const pause = $('#pause')
+	const fab = $('#pause-fab')
+	if (pause) {
+		pause.textContent = label
+		pause.disabled = ui.phase === 'idle'
+	}
+	if (fab) {
+		fab.textContent = ui.paused ? '▶' : '❚❚'
+		fab.title = label
+		fab.classList.toggle('is-paused', ui.paused)
+		fab.disabled = ui.phase === 'idle'
+	}
+	document.body.classList.toggle('is-paused', ui.paused && ui.phase !== 'idle')
+}
+
+function setPaused(paused) {
+	if (ui.phase === 'idle') return
+	ui.paused = paused
+	syncPause()
+	paint()
+}
+
+function togglePause() {
+	if (ui.phase === 'idle') return
+	if (!ui.playing && !ui.paused && ui.phase === 'gut' && ui.hours >= 48) return
+	if (!ui.playing && !ui.paused) ui.playing = true
+	setPaused(!ui.paused)
 }
 
 function renderTray() {
@@ -72,6 +117,7 @@ function renderTray() {
 			if (ui.phase === 'idle') paint()
 		})
 		btn.addEventListener('dragstart', (e) => {
+			audio.unlock()
 			e.dataTransfer.setData('text/plain', id)
 			e.dataTransfer.effectAllowed = 'copy'
 			document.body.classList.add('dragging')
@@ -99,16 +145,22 @@ function startEating(id) {
 	ui.sparks = []
 	ui.lastSay = ''
 	ui.playing = true
+	ui.paused = false
 	ui.phase = 'chew'
 	ui.hours = 0
 	ui.farted = false
 	ui.pooped = false
+	ui.bilePlayed = false
+	ui.acidPlayed = false
+	ui.gurgleAcc = 0
 	ui.chewFor = meal.chew === 'liquid' ? 1.4 : meal.chew === 'dense' ? 5.2 : 3.8
 	lastTick = performance.now()
 	audio.unlock()
 	audio.setMuted(ui.muted)
-	say('In the mouth', `${meal.foods[0].name} hits the teeth. ${meal.chew === 'liquid' ? 'Almost no chewing — it is already a swallowable bolus.' : 'Watch it fracture, wet with saliva, and turn to mush.'}`)
+	if (meal.chew === 'liquid') audio.slurp()
+	say('Bite', chewCall().line)
 	$('#eat').textContent = 'Eating…'
+	syncPause()
 }
 
 function eat() {
@@ -133,16 +185,18 @@ function tick(ts) {
 	requestAnimationFrame(tick)
 	const dt = Math.min(0.05, (ts - lastTick) / 1000)
 	lastTick = ts
+	if (!ui.playing || ui.paused) {
+		paint()
+		return
+	}
+
+	ui.animT += dt
 	ui.sparks = ui.sparks.filter((s) => {
 		s.life -= dt
 		s.x += (s.tx - s.x) * dt * 2.2
 		s.y += (s.ty - s.y) * dt * 2.2
 		return s.life > 0
 	})
-	if (!ui.playing) {
-		paint()
-		return
-	}
 
 	if (ui.phase === 'chew') {
 		ui.hours += dt
@@ -151,12 +205,12 @@ function tick(ts) {
 			chewAcc = 0
 			audio.chew(meal.chew)
 		}
-		if (ui.hours > ui.chewFor * 0.45) say('Mush', 'Saliva and crushing have turned recognizable food into a wet bolus. Particle size is collapsing.')
+		if (ui.hours > ui.chewFor * 0.45) say('Mush', mushCall().line)
 		if (ui.hours > ui.chewFor) {
 			ui.phase = 'swallow'
 			ui.hours = 0
 			audio.swallow()
-			say('Swallow', 'Epiglottis covers the airway. A peristaltic stripping wave pushes the bolus down the esophagus. Gravity is optional.')
+			say('Swallow', 'TRAPDOOR. Epiglottis slams the airway shut. One wet slug down the esophagus. Gravity is optional. Breathing is not allowed.')
 		}
 	} else if (ui.phase === 'swallow') {
 		ui.hours += dt
@@ -164,28 +218,55 @@ function tick(ts) {
 			ui.phase = 'gut'
 			ui.hours = 0.01
 			if (meal.carbonated) audio.fizz()
-			say('Stomach', `Acid. pH ~2. ${meal.macros.protein > 1 ? 'Pepsin is cutting protein.' : ''} ${meal.macros.fat > 2 ? 'Fat is delaying emptying.' : ''} Only bits ≲ 2 mm leave the pylorus.`)
+			audio.acid()
+			ui.acidPlayed = true
+			say('Stomach', stomachCall().line)
 		}
 	} else if (ui.phase === 'gut') {
 		ui.hours += dt * ui.speed * (0.4 + ui.hours * 0.09)
 		if (ui.hours > 48) {
 			ui.hours = 48
 			ui.playing = false
+			ui.paused = false
 			$('#eat').textContent = 'Eat again'
+			syncPause()
 		}
-		if (Math.random() < dt * 0.08) audio.squish()
 		const state = stateAt(meal, ui.hours, 'gut')
-		if (state.stage === 'duodenum') say('Bile and enzymes', 'Gallbladder squeeze. Bile emulsifies fat. Pancreatic juice raises pH so amylase, lipase, and proteases can work.')
-		if (state.stage === 'jejunum') say('Absorption', 'The coils are the border. Sugars and amino acids take the portal vein to the liver. Fat takes cream-colored lacteals into lymph. The food you see is shrinking because it is leaving the tube.')
-		if (state.stage === 'colon') say('Colon', 'Leftover fiber and water. Microbes ferment what the small bowel missed. Color turns brown from stercobilin. This is where poop is made.')
+		ui.gurgleAcc += dt
+		if (state.stage === 'stomach') {
+			if (ui.gurgleAcc > 1.6) {
+				ui.gurgleAcc = 0
+				audio.acid()
+			}
+		} else if (state.stage === 'duodenum' || state.stage === 'jejunum' || state.stage === 'ileum') {
+			if (ui.gurgleAcc > 1.1) {
+				ui.gurgleAcc = 0
+				if (Math.random() < 0.65) audio.gurgle()
+				else audio.squish()
+			}
+		} else if (state.stage === 'colon' || state.stage === 'rectum') {
+			if (ui.gurgleAcc > 0.9) {
+				ui.gurgleAcc = 0
+				if (state.gas >= 2) audio.bubble()
+				else audio.squish()
+			}
+		}
+		if (state.stage === 'duodenum' && !ui.bilePlayed) {
+			ui.bilePlayed = true
+			audio.bile()
+			say('Bile', 'BILE DUMP. The gallbladder squeezes green-gold detergent onto the fat. Pancreas floods bicarbonate so the enzymes can actually work.')
+		}
+		if (state.stage === 'jejunum') say('Heist', 'THE HEIST. Look — bits are vanishing. That is not magic. That is you. Sugars and amino acids steal into the portal vein. Fat sneaks out the back through lymph.')
+		if (state.stage === 'colon') say('Colon', 'Leftovers. Water out. Bacteria in. They are throwing a fermentation party and the balloons are hydrogen.')
 		if (state.stage === 'rectum' && !ui.pooped) {
 			ui.pooped = true
-			say('Poop', `Bristol type ${state.bristol} — ${BRISTOL[state.bristol - 1]}. A typical-adult model of this meal, not your lab result.`)
+			audio.plop()
+			say('Out', poopCall(state).line)
 		}
 		if (state.fartNow && !ui.farted) {
 			ui.farted = true
 			if (!ui.muted) audio.fart(state.gas)
-			say('Gas', 'Colonic bacteria ate leftover carbohydrate and made hydrogen, carbon dioxide, and maybe methane.')
+			say('Gas', 'THERE IT IS. Microbial exhaust. Hydrogen, carbon dioxide, maybe methane. Your colon just exhaled.')
 		}
 	}
 	paint()
@@ -202,9 +283,10 @@ function paint() {
 
 	highlight(ui.phase === 'idle' ? 'idle' : state.stage)
 	drawFood(state)
-	drawNarration(state)
+	drawBooth(state)
 	drawEpiglottis(ui.phase === 'swallow')
 	drawJaw(ui.phase === 'chew')
+	syncPause()
 }
 
 function highlight(stage) {
@@ -223,8 +305,11 @@ function drawEpiglottis(on) {
 function drawJaw(on) {
 	const jaw = $('#jaw')
 	if (!jaw) return
-	const t = on ? Math.sin(performance.now() / 90) * 5 : 0
-	jaw.setAttribute('transform', `translate(0 ${t})`)
+	if (on && !ui.paused) ui.jawT = Math.sin(ui.animT * 11) * 5
+	if (!on) ui.jawT = 0
+	jaw.setAttribute('transform', `translate(0 ${ui.jawT})`)
+	const tongue = $('#tongue')
+	if (tongue) tongue.setAttribute('transform', `translate(0 ${on ? ui.jawT * 0.45 : 0})`)
 }
 
 function svgEl(name, attrs) {
@@ -248,11 +333,7 @@ function drawFood(state) {
 	else drawGut(g, state)
 
 	ui.sparks.forEach((s) => {
-		g.appendChild(svgEl('circle', {
-			cx: s.x, cy: s.y, r: 2.2,
-			fill: s.kind === 'fat' ? '#e6d48a' : '#d46a5a',
-			opacity: String(Math.max(0.15, s.life))
-		}))
+		g.appendChild(blob(s.x, s.y, 2.4, s.kind === 'fat' ? '#e6d48a' : '#d46a5a', Math.max(0.15, s.life)))
 	})
 }
 
@@ -269,9 +350,19 @@ function drawChew(g) {
 		const ang = (i / 8) * Math.PI * 2 + ui.hours * 3
 		const spread = p < 0.22 ? 0 : 10 + p * 8
 		const x = MOUTH.x + Math.cos(ang) * spread
-		const y = MOUTH.y + Math.sin(ang) * (spread * 0.45) + Math.sin(performance.now() / 90) * 3
+		const y = MOUTH.y + Math.sin(ang) * (spread * 0.45) + ui.jawT * 0.4
 		const r = (14 - p * 9) * (n === 1 ? 1 : 0.55)
 		g.appendChild(blob(x, y, r, mush, 0.92))
+	}
+	if (p > 0.2 && p < 0.75) {
+		g.appendChild(svgEl('circle', {
+			cx: MOUTH.x + 18, cy: MOUTH.y + 8, r: 2.2,
+			fill: '#e8efe8', opacity: '0.55'
+		}))
+		g.appendChild(svgEl('circle', {
+			cx: MOUTH.x - 16, cy: MOUTH.y + 10, r: 1.6,
+			fill: '#e8efe8', opacity: '0.4'
+		}))
 	}
 }
 
@@ -285,7 +376,6 @@ function drawSwallow(g) {
 function drawGut(g, state) {
 	const n = 46
 	const barium = ui.view === 'barium'
-	let absorbed = 0
 	for (let i = 0; i < n; i++) {
 		const kind = particleKind(i)
 		const u = particleU(state, i, kind)
@@ -293,7 +383,7 @@ function drawGut(g, state) {
 		const pt = pathEl.getPointAtLength(Math.min(0.995, u) * pathLen)
 		const inSi = state.stage === 'jejunum' || state.stage === 'ileum' || state.stage === 'duodenum'
 		const absorb = inSi && kind !== 'fiber' ? Math.min(0.85, state.hours / 8) : 0
-		if (absorb > 0.15 && Math.random() < 0.04) {
+		if (absorb > 0.15 && Math.random() < 0.04 && !ui.paused) {
 			ui.sparks.push({
 				x: pt.x, y: pt.y,
 				tx: kind === 'fat' ? THORACIC.x : LIVER.x,
@@ -301,7 +391,6 @@ function drawGut(g, state) {
 				life: 1.1,
 				kind
 			})
-			absorbed += 1
 		}
 		if (absorb > 0.7 && kind !== 'fiber') continue
 		const churn = state.stage === 'stomach' ? 11 : 5
@@ -337,13 +426,16 @@ function drawPoop(g, state) {
 	const y = ANUS.y - 40 + t * 50
 	const x = ANUS.x
 	const type = state.bristol
-	const c = '#6b4a32'
+	const c = '#5a3c28'
 	if (type <= 2) {
 		for (let i = 0; i < 5; i++) g.appendChild(blob(x + (i - 2) * 7, y + (i % 2) * 6, 5, c, 0.95))
 	} else if (type <= 4) {
 		g.appendChild(svgEl('path', {
-			d: `M ${x - 7} ${y} C ${x - 8} ${y + 28}, ${x + 8} ${y + 28}, ${x + 7} ${y} Z`,
+			d: `M ${x - 8} ${y} C ${x - 10} ${y + 32}, ${x + 10} ${y + 32}, ${x + 8} ${y} Z`,
 			fill: c
+		}))
+		g.appendChild(svgEl('ellipse', {
+			cx: x - 2, cy: y + 8, rx: 3, ry: 2, fill: '#6e4a32', opacity: '0.5'
 		}))
 	} else if (type === 5) {
 		g.appendChild(blob(x - 8, y, 7, c, 0.9))
@@ -354,7 +446,15 @@ function drawPoop(g, state) {
 }
 
 function blob(x, y, r, fill, opacity) {
-	return svgEl('circle', { cx: x, cy: y, r, fill, opacity: String(opacity) })
+	const g = svgEl('g', {})
+	g.appendChild(svgEl('ellipse', {
+		cx: x, cy: y, rx: r * 1.18, ry: r * 0.86, fill, opacity: String(opacity)
+	}))
+	g.appendChild(svgEl('ellipse', {
+		cx: x - r * 0.32, cy: y - r * 0.28, rx: r * 0.38, ry: r * 0.22,
+		fill: '#fff', opacity: String(Math.min(0.35, opacity * 0.28))
+	}))
+	return g
 }
 
 function drawXrayGas(state) {
@@ -415,33 +515,137 @@ function hexRgb(h) {
 	return [parseInt(s.slice(0, 2), 16), parseInt(s.slice(2, 4), 16), parseInt(s.slice(4, 6), 16)]
 }
 
-function drawNarration(state) {
-	const title = $('#seeing-title')
-	const copy = $('#seeing-copy')
-	const clock = $('#clock')
-	if (ui.phase === 'idle') {
-		title.textContent = 'Drop food on the mouth'
-		copy.textContent = 'Grab something from the plate and drop it on the lips. Chew becomes mush, mush becomes chyme, nutrients leave the tube, leftover becomes poop.'
-		clock.textContent = 'Drag a food onto the mouth'
-	} else if (ui.phase === 'chew') {
-		const mush = ui.hours > ui.chewFor * 0.45
-		title.textContent = mush ? 'Turning to mush' : 'Chewing'
-		copy.textContent = mush
-			? 'You are watching recognizable food lose its shape. Saliva + crushing = bolus.'
-			: `${meal.foods[0].name} is between the teeth. Six systems are eating. The gut is only receiving.`
-		clock.textContent = 'Mouth'
-	} else if (ui.phase === 'swallow') {
-		title.textContent = 'Swallowing'
-		copy.textContent = 'One wet bolus. Epiglottis vs trachea. Then the esophagus takes over.'
-		clock.textContent = 'Pharynx → esophagus'
-	} else {
-		title.textContent = labelStage(state.stage)
-		copy.textContent = seeingCopy(state)
-		clock.textContent = formatHours(state.hours) + '  ·  ' + state.appearance
+function chewCall() {
+	const name = foodName()
+	const lines = {
+		water: { title: 'A sip', line: `${name}. No chew. Just a cold swallow lining up at the trapdoor.` },
+		cola: { title: 'Fizz', line: `${name} hits the tongue — sugar, acid, bubbles trying to climb back out already.` },
+		milk: { title: 'White', line: `${name}. No fracture. A creamy swallow. Lactose is the plot twist later, if this person has no lactase.` },
+		apple: { title: 'Crunch', line: `CRUNCH. Enamel vs ${name}. Juice everywhere. Skin is fiber. Flesh is sugar-water. The mouth is winning.` },
+		broccoli: { title: 'Crunch', line: `${name} fights back. Cell walls. Chlorophyll. A fibrous crunch the small bowel will not fully cash.` },
+		steak: { title: 'Work', line: `${name}. This is a job. Muscle fibers. Fat. Masseter burning. The stomach is going to be busy for hours.` },
+		'black-beans': { title: 'Dense', line: `${name}. Starchy. Tight. The GOS in these is a gift to the colon bacteria — they will throw a gas party.` },
+		pizza: { title: 'Loaded', line: `${name}. Fat, starch, cheese. A delayed-emptying special. The pylorus is going to be picky.` },
+		oats: { title: 'Glue', line: `${name} going gluey. Beta-glucan. This will thicken into a respectable bolus.` },
+		'white-rice': { title: 'Soft', line: `${name} between the teeth. Soft starch. Easy mush. A quiet colon later — rice does not ferment much.` }
 	}
+	return lines[foodId()] || { title: 'Bite', line: `${name} hits the teeth. Six systems are eating. The gut is only receiving.` }
+}
+
+function mushCall() {
+	return {
+		title: 'Mush',
+		line: `It is paste. You could not pick ${foodName()} out of a lineup. Saliva + crushing = a swallowable bolus. Gross. Perfect.`
+	}
+}
+
+function stomachCall() {
+	const fat = meal.macros.fat > 2
+	const pro = meal.macros.protein > 1
+	return {
+		title: 'Acid vat',
+		line: `Welcome to the acid vat. pH ~2. This would blister skin. ${pro ? 'Pepsin is unzipping protein like a cheap jacket. ' : ''}${fat ? 'Fat is stalling the exit. ' : ''}Only bits ≲ 2 mm get past the pylorus.`
+	}
+}
+
+function poopCall(state) {
+	return {
+		title: 'Out',
+		line: `And that is the exit. Bristol type ${state.bristol} — ${BRISTOL[state.bristol - 1]}. Everything useful already left. This is the receipt. A typical-adult model, not your lab result.`
+	}
+}
+
+function boothCopy(state) {
+	if (ui.phase === 'idle') {
+		return {
+			title: 'Waiting on a bite',
+			line: 'Drag anything off that plate and drop it on the mouth. I will call the whole trip — chew, mush, acid, heist, fermentation, poop.',
+			aside: 'Hit Pause any time the picture gets ahead of the words. Spacebar works too.'
+		}
+	}
+	if (ui.phase === 'chew') {
+		const mush = ui.hours > ui.chewFor * 0.45
+		const call = mush ? mushCall() : chewCall()
+		return {
+			title: call.title,
+			line: call.line,
+			aside: mush
+				? 'Particle size is collapsing. A bolus is just food that has agreed to be swallowed.'
+				: 'Incisors cut. Molars grind. Parotids hose it with saliva. Amylase starts starch before the stomach even knows.'
+		}
+	}
+	if (ui.phase === 'swallow') {
+		return {
+			title: 'The trapdoor',
+			line: 'One wet bolus. Epiglottis vs trachea. Then a stripping wave down the esophagus. You do not get a vote.',
+			aside: 'The lower esophageal sphincter is the bouncer at the stomach door.'
+		}
+	}
+	const stage = {
+		esophagus: {
+			title: 'Down the pipes',
+			line: 'The mush is a single slug riding a peristaltic stripping wave. Gravity is a courtesy, not a requirement.',
+			aside: 'About two seconds of transit if the wave is honest.'
+		},
+		stomach: {
+			title: 'Chyme factory',
+			line: stomachCall().line,
+			aside: 'Liquids leave first. Fat lags. That pale J on your right is the patient’s left — the fundus parked under the ribs.'
+		},
+		duodenum: {
+			title: 'Chemical takedown',
+			line: 'Bile from the green gallbladder. Bicarbonate and enzymes from the pancreas. Fat goes cloudy. This is where the meal is taken apart for real.',
+			aside: 'The C-loop of duodenum is hugging the head of the pancreas. That is not a cartoon. That is anatomy.'
+		},
+		jejunum: {
+			title: 'The heist',
+			line: 'Watch bits vanish. Red sparks to the liver — sugars and amino acids in the portal vein. Cream sparks up — fat in lacteals, into lymph. Fiber stays in the tube because it cannot cross.',
+			aside: 'The coils are the border between “food” and “you.”'
+		},
+		ileum: {
+			title: 'Last useful bits',
+			line: 'Residue, bile acids, B12 if there is any. Most of the meal has already crossed into blood or lymph. What remains is heading for the cecum.',
+			aside: 'Terminal ileum, viewer’s left, dumps into the cecum through the ileocecal valve.'
+		},
+		colon: {
+			title: 'The drying rack',
+			line: 'Water out. Microbes in. Leftover carbohydrate becomes gas. Color turns brown here — stercobilin, late, not in the stomach. This is poop being assembled.',
+			aside: meal.fermentable ? 'This meal has fermentable leftovers. The bacteria are employed.' : 'A quiet ferment. Rice-like. Fewer balloons.'
+		},
+		rectum: {
+			title: 'Outgoing',
+			line: poopCall(state).line,
+			aside: 'Haustra packed it. Rectum holds it. The rest is plumbing.'
+		}
+	}
+	return stage[state.stage] || {
+		title: 'Follow the food',
+		line: 'The model is the event. I just call the play.',
+		aside: ''
+	}
+}
+
+function drawBooth(state) {
+	const copy = boothCopy(state)
+	const title = $('#call-title')
+	const line = $('#call-line')
+	const aside = $('#call-aside')
+	const clock = $('#clock')
+	const live = $('#live-pill')
+	if (title) title.textContent = copy.title
+	if (line) line.textContent = copy.line
+	if (aside) aside.textContent = copy.aside
+	if (live) {
+		live.textContent = ui.paused ? 'PAUSED' : (ui.playing ? 'LIVE' : 'STANDBY')
+		live.classList.toggle('paused', ui.paused)
+		live.classList.toggle('hot', ui.playing && !ui.paused)
+	}
+	if (ui.phase === 'idle') clock.textContent = 'Drag a food onto the mouth'
+	else if (ui.phase === 'chew') clock.textContent = 'Mouth · chewing'
+	else if (ui.phase === 'swallow') clock.textContent = 'Pharynx → esophagus'
+	else clock.textContent = formatHours(state.hours) + '  ·  ' + state.appearance
 	$('#pH').textContent = ui.phase === 'idle' ? '' : `pH ${state.pH}`
 	$('#bristol-read').textContent = ui.phase === 'gut' ? `Bristol ${state.bristol} — ${BRISTOL[state.bristol - 1]}` : ''
-
 	$('#log').innerHTML = ui.log.map((row) => `<li><b>${row.title}</b>${row.text}</li>`).join('')
 
 	const proofs = proofsFor(state.proofIds).slice(0, 1)
@@ -460,35 +664,9 @@ function drawNarration(state) {
 	} else $('#long').hidden = true
 }
 
-function seeingCopy(state) {
-	return {
-		esophagus: 'The mush is a single bolus riding a stripping wave toward the stomach.',
-		stomach: 'That pale J is turning bolus into chyme — an acidic slurry. Fat lags. Liquids leave first.',
-		duodenum: 'Bile (green gallbladder) + pancreatic juice. Fat turns cloudy. This is where the meal is chemically taken apart.',
-		jejunum: 'Watch bits vanish. That is absorption: red sparks to the liver (portal), cream sparks up (lymph / fat). Fiber stays.',
-		ileum: 'Residue and B12. Most of the useful meal has already crossed into you.',
-		colon: 'Drying, fermenting, browning. Leftover carbohydrate becomes gas. This is poop being assembled.',
-		rectum: 'Outgoing. The shape is the Bristol model for this meal’s fiber, fat, and leftover sugar.'
-	}[state.stage] || 'Follow the food in the model. This column only names it.'
-}
-
 function formatHours(h) {
 	if (h < 1) return `${Math.round(h * 60)} min`
 	return `${Math.floor(h)} h ${Math.round((h % 1) * 60)} m`
-}
-
-function labelStage(stage) {
-	return {
-		chew: 'mouth',
-		swallow: 'swallow',
-		esophagus: 'esophagus',
-		stomach: 'stomach',
-		duodenum: 'duodenum',
-		jejunum: 'absorbing',
-		ileum: 'ileum',
-		colon: 'colon',
-		rectum: 'poop'
-	}[stage] || stage
 }
 
 function longTerm(m) {
@@ -516,10 +694,8 @@ function bind() {
 	})
 
 	$('#eat').addEventListener('click', eat)
-	$('#pause').addEventListener('click', () => {
-		ui.playing = !ui.playing
-		$('#pause').textContent = ui.playing ? 'Pause' : 'Resume'
-	})
+	$('#pause').addEventListener('click', togglePause)
+	$('#pause-fab').addEventListener('click', togglePause)
 	$('#speed').addEventListener('input', (e) => {
 		ui.speed = Number(e.target.value)
 		$('#speed-read').textContent = `${ui.speed.toFixed(1)}×`
@@ -532,6 +708,7 @@ function bind() {
 	$('#mute').addEventListener('change', (e) => {
 		ui.muted = e.target.checked
 		audio.setMuted(ui.muted)
+		if (!ui.muted) audio.unlock()
 	})
 	$('#everyday').addEventListener('change', (e) => {
 		ui.everyDay = e.target.checked
@@ -547,11 +724,22 @@ function bind() {
 	$('#scrub').addEventListener('input', (e) => {
 		ui.phase = 'gut'
 		ui.playing = false
+		ui.paused = false
 		ui.hours = Number(e.target.value)
 		$('#eat').textContent = 'Eat again'
+		syncPause()
 		paint()
 	})
+	window.addEventListener('keydown', (e) => {
+		if (e.code !== 'Space') return
+		const tag = (e.target && e.target.tagName) || ''
+		if (tag === 'INPUT' || tag === 'BUTTON' || tag === 'TEXTAREA') return
+		e.preventDefault()
+		togglePause()
+	})
 
+	audio.setMuted(ui.muted)
+	syncPause()
 	requestAnimationFrame(tick)
 }
 
