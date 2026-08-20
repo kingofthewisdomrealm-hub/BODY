@@ -30,7 +30,13 @@ main{display:grid;grid-template-columns:1fr 320px;min-height:0}
 svg.body{width:100%;height:100%;display:block}
 #tray{position:absolute;left:10px;top:10px;width:148px;max-height:calc(100% - 70px);overflow:auto;z-index:6;padding:0;border:0;background:transparent}
 #tray h2{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin:0 0 8px}
-.food{width:100%;display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);color:var(--ink);text-align:left;padding:7px 8px;margin-bottom:6px;border-radius:10px;cursor:pointer;backdrop-filter:blur(10px)}
+.food{width:100%;display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);color:var(--ink);text-align:left;padding:7px 8px;margin-bottom:6px;border-radius:10px;cursor:grab;backdrop-filter:blur(10px)}
+.food:active{cursor:grabbing}
+body.dragging #mouth-target{opacity:1}
+body.over-mouth #mouth-target{opacity:1;fill-opacity:.22}
+#log{list-style:none;padding:0;margin:0 0 16px}
+#log li{border-left:2px solid var(--gold);padding:6px 0 8px 10px;margin-bottom:8px;color:var(--dim);font-size:13.5px;line-height:1.45}
+#log li b{display:block;color:var(--ink);font-size:12px;margin-bottom:2px}
 .food.on{border-color:var(--gold)}
 .food b{font-size:12px;display:block}
 .food small{display:block;color:var(--faint);font-size:10px}
@@ -94,7 +100,7 @@ body[data-view="xray"] .hint-x{display:block}
 <main>
 	<section class="viewport">
 		<section id="tray"><h2>Plate</h2></section>
-		<p class="hint">Anterior. Your right = patient’s left (stomach). Your left = liver.</p>
+		<p class="hint">Drag a food onto the mouth.</p>
 		<p class="hint hint-x" style="top:32px">Plain film: gas and bone. The meal is invisible.</p>
 		<svg class="body" viewBox="0 0 640 1080" role="img" aria-label="Digestive organs in a living torso">
 			<defs>
@@ -163,6 +169,7 @@ body[data-view="xray"] .hint-x{display:block}
 					<rect x="329" y="91" width="7" height="8" rx="1" fill="#f3ead8"/>
 				</g>
 			</g>
+			<ellipse id="mouth-target" cx="320" cy="98" rx="48" ry="32" fill="#d4a24c" fill-opacity="0.08" stroke="#d4a24c" stroke-width="2" stroke-dasharray="5 5" opacity="0"/>
 			<g id="epiglottis-flap" data-organ="epiglottis">
 				<path d="M312 124 q8 -16 16 0" fill="#d47a7a"/>
 			</g>
@@ -273,36 +280,18 @@ body[data-view="xray"] .hint-x{display:block}
 		</div>
 	</section>
 	<aside class="lab">
-		<h2>What you are seeing</h2>
-		<div id="seeing-title">Ready to eat</div>
-		<p id="seeing-copy">The organs are placed as in a living anterior torso: liver on the patient’s right, J-shaped stomach on the left, small bowel coiled in the middle, large bowel framing it with haustra.</p>
-		<div class="who">
-			<button>nervous</button>
-			<button>endocrine</button>
-			<button>muscular</button>
-			<button>skeletal</button>
-			<button>respiratory</button>
-			<button>digestive</button>
-		</div>
-		<p class="note" id="meal-label">White rice</p>
-		<div id="macros"></div>
-		<ul id="ingredients"></ul>
-		<h2>Chemistry</h2>
-		<ul id="chem"></ul>
-		<h2>Physics</h2>
-		<ul id="phys"></ul>
-		<h2>Biology</h2>
-		<ul id="bio"></ul>
-		<h2>Other systems</h2>
-		<div id="systems"></div>
+		<h2>Narration</h2>
+		<div id="seeing-title">Drop food on the mouth</div>
+		<p id="seeing-copy">Grab something from the plate and drop it on the lips. You will watch it chewed into mush, swallowed, acid-churned, absorbed, fermented, and pooped — the model is the event; this column only names it.</p>
+		<p class="note" id="meal-label"></p>
 		<p id="bristol-read" class="note"></p>
+		<ol id="log"></ol>
 		<div id="long" hidden></div>
-		<h2>Proof</h2>
 		<div id="proof"></div>
 	</aside>
 </main>
 <footer>
-	<button class="eat" id="eat">Eat this</button>
+	<button class="eat" id="eat">Eat selected</button>
 	<button class="ghost" id="pause">Pause</button>
 	<label class="chk">Speed <input id="speed" type="range" min="0.4" max="6" step="0.1" value="1"> <span id="speed-read">1.0×</span></label>
 	<input id="scrub" type="range" min="0" max="48" step="0.1" value="0" aria-label="Hours after swallow">
